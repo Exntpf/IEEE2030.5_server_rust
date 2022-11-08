@@ -8,4 +8,3 @@ edition = "2021"
 [dependencies]
 
 mbedtls = "0.8"
-chrono = "0.4"
