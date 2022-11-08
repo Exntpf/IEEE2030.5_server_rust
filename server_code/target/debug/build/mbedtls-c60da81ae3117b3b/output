@@ -1,0 +1,49 @@
+cargo:rustc-cfg=sys_std_component="net"
+cargo:rustc-cfg=sys_std_component="entropy"
+cargo:rustc-cfg=sys_std_component="fs"
+cargo:rustc-cfg=sys_time_component="libc"
+cargo:rustc-cfg=sys_threading_component="pthread"
+TARGET = Some("x86_64-unknown-linux-gnu")
+OPT_LEVEL = Some("0")
+HOST = Some("x86_64-unknown-linux-gnu")
+cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+CC_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+CC_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_CC
+HOST_CC = None
+cargo:rerun-if-env-changed=CC
+CC = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+CFLAGS_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+CFLAGS_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_CFLAGS
+HOST_CFLAGS = None
+cargo:rerun-if-env-changed=CFLAGS
+CFLAGS = None
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+DEBUG = Some("true")
+CARGO_CFG_TARGET_FEATURE = Some("fxsr,llvm14-builtins-abi,sse,sse2")
+running: "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "/home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor/include" "-Wall" "-Wextra" "-DMBEDTLS_CONFIG_FILE=\"/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/config.h\"" "-o" "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-c60da81ae3117b3b/out/src/mbedtls_malloc.o" "-c" "src/mbedtls_malloc.c"
+exit status: 0
+running: "cc" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-g" "-fno-omit-frame-pointer" "-m64" "-I" "/home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor/include" "-Wall" "-Wextra" "-DMBEDTLS_CONFIG_FILE=\"/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/config.h\"" "-o" "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-c60da81ae3117b3b/out/src/rust_printf.o" "-c" "src/rust_printf.c"
+exit status: 0
+cargo:rerun-if-env-changed=AR_x86_64-unknown-linux-gnu
+AR_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=AR_x86_64_unknown_linux_gnu
+AR_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_AR
+HOST_AR = None
+cargo:rerun-if-env-changed=AR
+AR = None
+running: "ar" "cq" "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-c60da81ae3117b3b/out/librust-mbedtls.a" "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-c60da81ae3117b3b/out/src/mbedtls_malloc.o" "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-c60da81ae3117b3b/out/src/rust_printf.o"
+exit status: 0
+running: "ar" "s" "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-c60da81ae3117b3b/out/librust-mbedtls.a"
+exit status: 0
+cargo:rustc-link-lib=static=rust-mbedtls
+cargo:rustc-link-search=native=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-c60da81ae3117b3b/out
+cargo:rustc-link-lib=static=mbedtls
+cargo:rustc-link-lib=static=mbedx509
+cargo:rustc-link-lib=static=mbedcrypto
