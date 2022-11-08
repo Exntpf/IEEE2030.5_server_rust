@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out")
+  set(CMAKE_INSTALL_PREFIX "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -44,9 +44,9 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/include/cmake_install.cmake")
-  include("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/3rdparty/cmake_install.cmake")
-  include("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library/cmake_install.cmake")
+  include("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/include/cmake_install.cmake")
+  include("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/3rdparty/cmake_install.cmake")
+  include("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library/cmake_install.cmake")
 
 endif()
 
@@ -58,5 +58,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

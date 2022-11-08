@@ -1,9 +1,8 @@
 
 // starts up either a client or server instance.
 // client given IP address: 127.0.0.1:1111
-// server given IP address: 127.0.0.1:7878, which is hardcoded into client. 
+// server given IP address: 127.0.0.1:7877, which is hardcoded into client. 
 
-use core::panic;
 /*
 mbedtls config.rs options:
 
@@ -14,10 +13,9 @@ MBEDTLS_AES_C -> defined
 MBEDTLS_CCM_C -> defined
 */
 use std::{
-    time::{SystemTime, UNIX_EPOCH},
     env,
-    fs,
-    io::{ prelude::*, Write, BufRead, BufReader},
+    fs::{File, self},
+    io::{ Write, BufRead, BufReader},
     net::{TcpListener, TcpStream},
 };
 
@@ -25,64 +23,17 @@ use std::{
 extern crate mbedtls;
 
 use mbedtls::rng::{CtrDrbg, OsEntropy};
-use mbedtls::{Error};
-use mbedtls::alloc::{List, Box};
 use mbedtls::pk::Pk; 
 use mbedtls::ssl::config::{Endpoint, Preset, Transport};
-use mbedtls::ssl::{Config, Context};
+use mbedtls::ssl::{Config, Context, ciphersuites::*};
 use mbedtls::x509::Certificate;
-use mbedtls::Result as TlsResult;
 
 use std::sync::Arc;
 
 const RSA_KEY_SIZE: u32 = 3072;
 const RSA_KEY_EXP: u32 = 0x10001;
 const DAYS_TO_SES: u64 = 86400;
-const CERT_VAL_SECS: u64 = (365 * DAYS_TO_SES);
-
-/// The below generates a (Private? || Public?) key and a self signed certificate
-/// to configure the TLS context.
-// let mut key = Pk::private_from_ec_components(EcGroup::new(SecP256R1).unwrap(), Mpi::new(198248952));
-// let mut key = Pk::generate_rsa(&mut rng, RSA_KEY_SIZE, RSA_KEY_EXP).unwrap();
-// let mut key_i = Pk::generate_rsa(&mut rng, RSA_KEY_SIZE, RSA_KEY_EXP).unwrap();
-
-// let (not_before, not_after) = get_validity();
-
-// task now: To get server_cert.pem data as [u8]
-fn get_key_and_cert(private_key_path: &str, cert_path: &str) -> Result<(Pk, List<Certificate>), i32> {
-
-    // let rng = Arc::new(CtrDrbg::new(Arc::new(entropy), None)?);
-    // let cert = Arc::new(Certificate::from_pem_multiple(keys::PEM_CERT.as_bytes())?);
-    // let key = Arc::new(Pk::from_private_key(keys::PEM_KEY.as_bytes(), None)?);
-    // let mut config = Config::new(Endpoint::Server, Transport::Stream, Preset::Default);
-    // config.set_rng(rng);
-    // config.push_cert(cert, key)?;
-
-    // let rc_config = Arc::new(config);
-
-
-    let cert_content = fs::read(cert_path)
-        .expect("Could not read server certificate .pem file\n");
-    let cert_content_bytes: &[u8] = &cert_content;
-    
-    let private_key_contents = fs::read(private_key_path)
-        .expect("Could not read private key .pem file\n");
-    let private_key_bytes: &[u8] = &private_key_contents;
-
-    
-    if let Ok(key) = Pk::from_private_key(private_key_bytes, None){
-        if let Ok(server_cert) = Certificate::from_pem_multiple(cert_content_bytes){
-
-            return Ok((key, server_cert));
-        } else {
-            println!("Could not generate certificate from {}", cert_path);
-        }
-    } else {
-        println!("Could not generate private key from {}", private_key_path);
-    }
-    Err(-1)
-}
-
+const CERT_VAL_SECS: u64 = 365 * DAYS_TO_SES;
 
 
 fn run_client() -> i32{
@@ -91,39 +42,46 @@ fn run_client() -> i32{
 
 fn connect_to_server() -> i32{
 
-    match TcpStream::connect("127.0.0.1:7878") {
+    match TcpStream::connect("127.0.0.1:7877") {
         Ok(mut stream) => {
             
             println!("Client: Connection to server established.");
 
             let get_msg_str= "GET /dcap HTTP/1.1\r\n";
-
             stream.write(get_msg_str.as_bytes()).unwrap();
 
             println!("Client: Get message sent successfully.");
 
             let buf_reader = BufReader::new(&mut stream);
+            let response_lines = buf_reader.lines();
 
-            match buf_reader.lines().next().unwrap() {
-                Ok(server_response) => {
-                    println!("Client: Received server response.");
-                    match fs::write("client_output.txt", server_response.as_bytes()){
-                        Ok(_) => {
-                            println!("Client: Server response successfully saved to client_output.txt.");
-                            return 0;
-                        },
-                        Err(err_code) => {
-                            println!("Client: Could not save server response to file -> {}", err_code);
-                            return -1;
+            println!("Client: Received server response.");
+            let mut output_file = File::create(&"client_output.txt").unwrap();
+            // let mut output_file = fs::OpenOptions::new()
+            //     .write(true)
+            //     .create(true)
+            //     .truncate(true)
+            //     .append(true)
+            //     .open("client_output.txt")
+            //     .unwrap();
 
-                        },
-                    };
-                },
-                Err(err_code) => {
-                    println!("Client: Server response error -> {}", err_code);
-                    return -1;
-                },
+            for line in response_lines {
+                match line {
+                    Ok(output_line) => {
+                        if let Err(err_code) = writeln!(output_file, "{}", &output_line){
+                                println!("Client: Could not save server response to file -> {}", err_code);
+                                return -1;
+                        }
+                        continue;
+                    },
+                    Err(err_code) => {
+                        println!("Client: Server response error -> {}", err_code);
+                        return -1;
+                    },
+                }
             }
+            println!("Client: Server response successfully saved to client_output.txt.");
+            return 0;
         },
         Err(err_code) => {
             println!("Client: Could not connect to server -> {}", err_code);
@@ -132,20 +90,21 @@ fn connect_to_server() -> i32{
     }
 }
 
-
 fn run_server() -> i32{
     
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
-    println!("server running on: 127.0.0.1:7878");
+    let listener = TcpListener::bind("127.0.0.1:7877").unwrap();
+    println!("server running on: 127.0.0.1:7877");
     
     for stream in listener.incoming(){
         let stream = stream.unwrap();
 //         let _ = serve(stream, &mut key, &mut cert).unwrap();
-        if let Ok((key, cert)) = get_key_and_cert(&"../server_private_key.pem", &"../server_cert.pem"){
-            server_handle_connection(stream, key, cert);
-        } else {
-            return -1;
-        }
+    server_handle_connection(stream);
+
+        // if let Ok((key, cert)) = get_key_and_cert(&"../server_private_key.pem", &"../server_cert.pem"){
+        //     server_handle_connection(stream, key, cert);
+        // } else {
+        //     return -1;
+        // }
 
     }
 
@@ -153,47 +112,106 @@ fn run_server() -> i32{
 }
 
 
+// fn get_key_and_cert(private_key_path: &str, cert_path: &str) -> Result<(Pk, List<Certificate>), i32> {
 
-fn server_handle_connection(mut stream: TcpStream, key: Pk, cert: List<Certificate>){
-    let random_num: [u8; 100];
+//     let cert_content = fs::read(cert_path)
+//         .expect("Could not read server certificate .pem file\n");
+//     let cert_content_bytes: &[u8] = &cert_content;
+    
+//     let private_key_contents = fs::read(private_key_path)
+//         .expect("Could not read private key .pem file\n");
+//     let private_key_bytes: &[u8] = &private_key_contents;
 
-    let rng = Arc::new(CtrDrbg::new(Arc::new(OsEntropy::new()), None)?);
+    
+//     if let Ok(key) = Pk::from_private_key(private_key_bytes, None){
+//         if let Ok(server_cert) = Certificate::from_pem_multiple(cert_content_bytes){
+
+//             return Ok((key, server_cert));
+//         } else {
+//             println!("Could not generate certificate from {}", cert_path);
+//         }
+//     } else {
+//         println!("Could not generate private key from {}", private_key_path);
+//     }
+//     Err(-1)
+// }
+
+// fn server_handle_connection(mut stream: TcpStream, key: Pk, cert: List<Certificate>){
+fn server_handle_connection(mut stream: TcpStream){
+
+    let entropy = OsEntropy::new();
+    let rng = Arc::new(CtrDrbg::new(Arc::new(entropy), None).unwrap());
 
     let mut config = Config::new(Endpoint::Server, Transport::Stream, Preset::Default);
     config.set_rng(rng);
-    config.push_cert(Arc::new(cert), Arc::new(key));
+
+    // let ciphersuites_list: Vec<i32> = vec![RsaWithAes128GcmSha256.into()];
+    // config.set_ciphersuites(Arc::new(vec![49324]));
+
+
+    // read .pem files
+    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/server_cert.pem")
+        .expect("Could not read server certificate .pem file\n");
+    let mut private_key_contents = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/server_private_key.pem")
+        .expect("Could not read private key .pem file\n");
+    
+    cert_content.append(&mut vec![0u8]);
+    private_key_contents.append(&mut vec![0u8]);
+    let cert_content_bytes: &[u8] = &cert_content;
+    let private_key_bytes: &[u8] = &private_key_contents;
+
+    // generate certificate, private key, and push to Config.
+    // could do some error checking here.
+    let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
+    let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
+    config.push_cert(server_cert, key);
+
+    // let cert = Arc::new(Certificate::from_pem_multiple(keys::EXPIRED_CERT.as_bytes())?);
+    // let key = Arc::new(Pk::from_private_key(keys::EXPIRED_KEY.as_bytes(), None)?);
+    // config.push_cert(cert, key)?;
+
     let mut ctx = Context::new(Arc::new(config));
+    // so far so good - above code aligns with client_server.rs test on mbedtls GitHub repo.
 
-    let mut buf = String::new();
-    let session = ctx.establish(&mut stream, None)?;
-
-    println!("Connection established!");
-    let buf_reader = BufReader::new(session);
-    let http_request_line = buf_reader
-        .lines()
-        .next()
-        .unwrap()
-        .unwrap();
-        // first unwrap is for Option because lines() might return None
-        // second unwrap is to return the actual str that gets assigned.
-        // unwrap() in the above line for commit 8610b4aef42b51dbe13231b84d2a6dba5fb94bb2 
-        // means that we are not handling the None that .lines() could return.
-
-
-    println!("server received request: {:#?}", http_request_line);
-    let (status_line, http_file) = match http_request_line.as_str() {
-        "GET /dcap HTTP/1.1" => ("HTTP/1.1 200 OK", "devCapMsg.html"),
-        _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
+    let session = match ctx.establish(stream, None) {
+        Ok(()) => {
+            println!("Conneciton Established!");
+        },
+        Err(a) => {
+            println!("Error establishing connection. Code: {}", a);
+            return;
+        },
     };
 
-    let content = fs::read_to_string(http_file).unwrap(); // this might return Err if file not found.
-    // for the server, could use the error here as a way to check if the file/resource exists
-    // but it still feels better to have a whitelist of the services offered by the server, compare 
-    // the request against that,
-    // and then have a function encapsulate the getting of the resource from the file.
-    let content_length = content.len();
-    let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
-    stream.write_all(response.as_bytes()).unwrap(); // error handling not done here either. write_all might return Err
+    let ciphersuite = ctx.ciphersuite().unwrap();
+    ctx.write_all(format!("Cipher suite: {:4x}", ciphersuite).as_bytes());
+
+    // let buf_reader = BufReader::new(session);
+    // let http_request_line = buf_reader
+    //     .lines()
+    //     .next()
+    //     .unwrap()
+    //     .unwrap();
+    //     // first unwrap is for Option because lines() might return None
+    //     // second unwrap is to return the actual str that gets assigned.
+    //     // unwrap() in the above line for commit 8610b4aef42b51dbe13231b84d2a6dba5fb94bb2 
+    //     // means that we are not handling the None that .lines() could return.
+
+
+    // println!("server received request: {:#?}", http_request_line);
+    // let (status_line, http_file) = match http_request_line.as_str() {
+    //     "GET /dcap HTTP/1.1" => ("HTTP/1.1 200 OK", "devCapMsg.html"),
+    //     _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
+    // };
+
+    // let content = fs::read_to_string(http_file).unwrap(); // this might return Err if file not found.
+    // // for the server, could use the error here as a way to check if the file/resource exists
+    // // but it still feels better to have a whitelist of the services offered by the server, compare 
+    // // the request against that,
+    // // and then have a function encapsulate the getting of the resource from the file.
+    // let content_length = content.len();
+    // let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
+    // stream.write_all(response.as_bytes()).unwrap(); // error handling not done here either. write_all might return Err
 }
 
 

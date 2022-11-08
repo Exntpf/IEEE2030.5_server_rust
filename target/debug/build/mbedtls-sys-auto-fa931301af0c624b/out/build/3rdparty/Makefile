@@ -60,7 +60,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
+CMAKE_BINARY_DIR = /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -132,14 +132,14 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/3rdparty//CMakeFiles/progress.marks
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles 0
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/3rdparty//CMakeFiles/progress.marks
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/clean
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/clean
 .PHONY : clean
 
 # The main clean target
@@ -148,17 +148,17 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/preinstall
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/preinstall
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 3rdparty/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Help Target
@@ -184,6 +184,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/server_code/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
