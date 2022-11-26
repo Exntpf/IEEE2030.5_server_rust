@@ -15,18 +15,18 @@ MBEDTLS_CCM_C -> defined
 use std::{
     env,
     fs::{File, self},
-    io::{ Write, BufRead, BufReader},
+    io::{ Write, BufRead, BufReader, Read},
     net::{TcpListener, TcpStream},
 };
 
 
 extern crate mbedtls;
 
-use mbedtls::rng::{CtrDrbg, OsEntropy};
+use mbedtls::{rng::{CtrDrbg, OsEntropy}};
 use mbedtls::pk::Pk; 
 use mbedtls::ssl::config::{Endpoint, Preset, Transport};
-use mbedtls::ssl::{Config, Context, ciphersuites::*};
-use mbedtls::x509::Certificate;
+use mbedtls::ssl::{Config, Context, ciphersuites::{CipherSuite}, Version};
+use mbedtls::x509::{Certificate, VerifyError};
 
 use std::sync::Arc;
 
@@ -42,21 +42,83 @@ fn run_client() -> i32{
 
 fn connect_to_server() -> i32{
 
-    match TcpStream::connect("127.0.0.1:7877") {
-        Ok(mut stream) => {
-            
-            println!("Client: Connection to server established.");
+    // not doing any error checking here, unlike earlier implementation.
+    let stream = TcpStream::connect("127.0.0.1:7877").unwrap();
 
-            let get_msg_str= "GET /dcap HTTP/1.1\r\n";
-            stream.write(get_msg_str.as_bytes()).unwrap();
+    let entropy = OsEntropy::new();
+    let rng = Arc::new(CtrDrbg::new(Arc::new(entropy), None).unwrap());
 
-            println!("Client: Get message sent successfully.");
+    let mut config = Config::new(Endpoint::Server, Transport::Stream, Preset::Default);
+    config.set_rng(rng);
 
-            let buf_reader = BufReader::new(&mut stream);
-            let response_lines = buf_reader.lines();
+    // 2030.5 requires at minimum: TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8 = EcdheEcdsaWithAes128Ccm8 = 0xC0AE
+    // Firefox does not consider this secure communication, so cannot establish a connection with this server.
+    // let ciphersuite_list: Vec<i32> = vec![CipherSuite::EcdheEcdsaWithAes128Ccm8.into(), CipherSuite::EcdheEcdsaWithAes256GcmSha384.into(), CipherSuite::EcdheEcdsaWithAes128GcmSha256.into(), 
+    // CipherSuite::EcdheEcdsaWithAes256CbcSha384.into(), CipherSuite::EcdheEcdsaWithAes128CbcSha256.into(), 0];
+    // config.set_ciphersuites(Arc::new(ciphersuite_list));
 
-            println!("Client: Received server response.");
-            let mut output_file = File::create(&"client_output.txt").unwrap();
+    
+    println!("Client: Setting CA");
+    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/serca_cert.pem")
+    .expect("Could not read server certificate .pem file\n");
+    cert_content.append(&mut vec![0u8]); // becuase certificates must be \0 terminated
+    let cert_content_bytes: &[u8] = &cert_content;
+    let ca_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
+    config.set_ca_list(ca_cert, None);
+    
+    // read .pem files
+    println!("Client: loading certificate and private key");
+    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/client_cert.pem")
+    .expect("Could not read server certificate .pem file\n");
+    cert_content.append(&mut vec![0u8]); // becuase certificates must be \0 terminated
+    let cert_content_bytes: &[u8] = &cert_content;
+    
+    let mut private_key_contents = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/client_private_key.pem")
+    .expect("Could not read private key .pem file\n");
+    private_key_contents.append(&mut vec![0u8]);
+    let private_key_bytes: &[u8] = &private_key_contents;
+    // client is reading in the certificates.
+    
+    // generate certificate, private key, and push to Config.
+    // could do some error checking here.
+    let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
+    let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
+    config.push_cert(server_cert, key);
+    
+    /* 
+     * as 2030.5 client cannot connect to a server with a self-signed
+     * certificate, the client must set who the CA is. this can be done with:
+     * rust-mbedtls/mbedtls/tests/client_server.rs:79
+     * Code to be inserted here.
+     */
+    println!("Client: making new context");
+    let mut ctx = Context::new(Arc::new(config));
+    // so far so good - above code aligns with client_server.rs test on mbedtls GitHub repo.
+    println!("Client: ctx setup complete. Attempting to establish connection TLS with server");
+    match ctx.establish(stream, None) {
+        Ok(()) => {
+            println!("Conneciton Established!");
+        },
+        Err(a) => {
+            println!("Error establishing connection. Code: {}", a);
+            return -1;
+        },
+    };
+
+    // let get_msg_str= "GET /dcap HTTP/1.1\r\n";
+    // ctx.write_all(get_msg_str.as_bytes());
+    
+
+    println!("Client: Get message sent successfully.");
+
+    let mut buf = [0u8; 13 + 1 + 4];
+    ctx.read_exact(&mut buf);
+    // assert_eq!(&buf, format!("Cipher suite: c0ae").as_bytes());
+
+    println!("Client: Received server response: {:#?}", buf);
+    println!("expected suite: c0ae = TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8");
+    // let mut output_file = File::create(&"client_output.txt").unwrap();
+
             // let mut output_file = fs::OpenOptions::new()
             //     .write(true)
             //     .create(true)
@@ -65,29 +127,23 @@ fn connect_to_server() -> i32{
             //     .open("client_output.txt")
             //     .unwrap();
 
-            for line in response_lines {
-                match line {
-                    Ok(output_line) => {
-                        if let Err(err_code) = writeln!(output_file, "{}", &output_line){
-                                println!("Client: Could not save server response to file -> {}", err_code);
-                                return -1;
-                        }
-                        continue;
-                    },
-                    Err(err_code) => {
-                        println!("Client: Server response error -> {}", err_code);
-                        return -1;
-                    },
-                }
-            }
-            println!("Client: Server response successfully saved to client_output.txt.");
-            return 0;
-        },
-        Err(err_code) => {
-            println!("Client: Could not connect to server -> {}", err_code);
-            return -1;
-        }
-    }
+    // for line in response_lines {
+    //     match line {
+    //         Ok(output_line) => {
+    //             if let Err(err_code) = writeln!(output_file, "{}", &output_line){
+    //                     println!("Client: Could not save server response to file -> {}", err_code);
+    //                     return -1;
+    //             }
+    //             continue;
+    //         },
+    //         Err(err_code) => {
+    //             println!("Client: Server response error -> {}", err_code);
+    //             return -1;
+    //         },
+    //     }
+    // }
+    // println!("Client: Server response successfully saved to client_output.txt.");
+    return 0;
 }
 
 fn run_server() -> i32{
@@ -138,27 +194,37 @@ fn run_server() -> i32{
 
 // fn server_handle_connection(mut stream: TcpStream, key: Pk, cert: List<Certificate>){
 fn server_handle_connection(mut stream: TcpStream){
-
+    
+    let mut config = Config::new(Endpoint::Server, Transport::Stream, Preset::Default);
+    
+    // set rng
     let entropy = OsEntropy::new();
     let rng = Arc::new(CtrDrbg::new(Arc::new(entropy), None).unwrap());
-
-    let mut config = Config::new(Endpoint::Server, Transport::Stream, Preset::Default);
     config.set_rng(rng);
 
-    // let ciphersuites_list: Vec<i32> = vec![RsaWithAes128GcmSha256.into()];
-    // config.set_ciphersuites(Arc::new(vec![49324]));
+    // 2030.5 requires at minimum: TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8 = EcdheEcdsaWithAes128Ccm8 = 0xC0AE
+    // Firefox does not consider this secure communication, so cannot establish a connection with this server.
+    let ciphersuite_list: Vec<i32> = vec![
+        CipherSuite::EcdheEcdsaWithAes128Ccm8.into(),
+        // CipherSuite::EcdheEcdsaWithAes256CbcSha384.into(), CipherSuite::EcdheEcdsaWithAes128CbcSha256.into(),
+        // CipherSuite::EcdheEcdsaWithAes256GcmSha384.into(), CipherSuite::EcdheEcdsaWithAes128GcmSha256.into(), 
+         0];
+
+    config.set_ciphersuites(Arc::new(ciphersuite_list));
 
 
     // read .pem files
-    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/server_cert.pem")
+    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/server_cert_selfSigned.pem")
         .expect("Could not read server certificate .pem file\n");
-    let mut private_key_contents = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/server_private_key.pem")
+    let mut private_key_contents = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/server1_private_key.pem")
         .expect("Could not read private key .pem file\n");
     
-    cert_content.append(&mut vec![0u8]);
+    cert_content.append(&mut vec![0u8]); // becuase certificates must be \0 terminated
     private_key_contents.append(&mut vec![0u8]);
     let cert_content_bytes: &[u8] = &cert_content;
     let private_key_bytes: &[u8] = &private_key_contents;
+
+    // Ok, we know that till here, the server has read in the right information.
 
     // generate certificate, private key, and push to Config.
     // could do some error checking here.
@@ -166,14 +232,11 @@ fn server_handle_connection(mut stream: TcpStream){
     let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
     config.push_cert(server_cert, key);
 
-    // let cert = Arc::new(Certificate::from_pem_multiple(keys::EXPIRED_CERT.as_bytes())?);
-    // let key = Arc::new(Pk::from_private_key(keys::EXPIRED_KEY.as_bytes(), None)?);
-    // config.push_cert(cert, key)?;
-
     let mut ctx = Context::new(Arc::new(config));
     // so far so good - above code aligns with client_server.rs test on mbedtls GitHub repo.
-
-    let session = match ctx.establish(stream, None) {
+    
+    println!("Server: ctx setup complete. Listening on TLS connection.");
+    match ctx.establish(stream, None) {
         Ok(()) => {
             println!("Conneciton Established!");
         },
@@ -183,9 +246,34 @@ fn server_handle_connection(mut stream: TcpStream){
         },
     };
 
-    let ciphersuite = ctx.ciphersuite().unwrap();
-    ctx.write_all(format!("Cipher suite: {:4x}", ciphersuite).as_bytes());
+    let mut server_buf = [0u8; 100];
+    ctx.read_exact(&mut server_buf).unwrap();
+    let full_request = String::from_utf8_lossy(&server_buf);
+    println!("Server recieved request: {}", full_request);
 
+    let http_request_line = full_request.lines().next().unwrap();
+    let (status_line, http_file) = match http_request_line {
+        "GET /dcap HTTP/1.1" => {
+            ("HTTP/1.1 200 OK", "devCapMsg.html")
+        },
+        _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
+    };
+    println!("request line: {}\nreturned status line: {}",http_request_line, status_line);
+    
+    let content = fs::read_to_string(http_file).unwrap(); // this might return Err if file not found.
+
+    // for the server, could use the error here as a way to check if the file/resource exists
+    // but it still feels better to have a whitelist of the services offered by the server, compare 
+    // the request against that,
+    // and then have a function encapsulate the getting of the resource from the file.
+    let content_length = content.len();
+    let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
+    // let response = format!("{content}");
+    println!("full server response: {}",  response);
+    ctx.write_all(response.as_bytes()).unwrap();
+
+    // let ciphersuite = ctx.ciphersuite().unwrap();
+    // ctx.write_all(format!("Cipher suite: {:4x}", ciphersuite).as_bytes());
     // let buf_reader = BufReader::new(session);
     // let http_request_line = buf_reader
     //     .lines()
@@ -197,21 +285,6 @@ fn server_handle_connection(mut stream: TcpStream){
     //     // unwrap() in the above line for commit 8610b4aef42b51dbe13231b84d2a6dba5fb94bb2 
     //     // means that we are not handling the None that .lines() could return.
 
-
-    // println!("server received request: {:#?}", http_request_line);
-    // let (status_line, http_file) = match http_request_line.as_str() {
-    //     "GET /dcap HTTP/1.1" => ("HTTP/1.1 200 OK", "devCapMsg.html"),
-    //     _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
-    // };
-
-    // let content = fs::read_to_string(http_file).unwrap(); // this might return Err if file not found.
-    // // for the server, could use the error here as a way to check if the file/resource exists
-    // // but it still feels better to have a whitelist of the services offered by the server, compare 
-    // // the request against that,
-    // // and then have a function encapsulate the getting of the resource from the file.
-    // let content_length = content.len();
-    // let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
-    // stream.write_all(response.as_bytes()).unwrap(); // error handling not done here either. write_all might return Err
 }
 
 
