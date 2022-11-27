@@ -1,9 +1,9 @@
-cargo:rustc-cfg=time_component="libc"
 cargo:rustc-cfg=threading_component="pthread"
-cargo:rustc-cfg=std_component="net"
 cargo:rustc-cfg=std_component="fs"
+cargo:rustc-cfg=std_component="net"
 cargo:rustc-cfg=std_component="entropy"
-cargo:platform-components=time_component=libc,threading_component=pthread,std_component=net,std_component=fs,std_component=entropy
+cargo:rustc-cfg=time_component="libc"
+cargo:platform-components=threading_component=pthread,std_component=fs,std_component=net,std_component=entropy,time_component=libc
 cargo:rerun-if-env-changed=RUST_MBEDTLS_SYS_SOURCE
 cargo:rerun-if-changed=vendor/CMakeLists.txt
 cargo:rerun-if-changed=vendor/include/mbedtls/config_psa.h
@@ -244,28 +244,20 @@ CMAKE_x86_64-unknown-linux-gnu = None
 CMAKE_x86_64_unknown_linux_gnu = None
 HOST_CMAKE = None
 CMAKE = None
-running: "cmake" "/home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor" "-DENABLE_PROGRAMS=OFF" "-DENABLE_TESTING=OFF" "-DCMAKE_INSTALL_PREFIX=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out" "-DCMAKE_C_FLAGS= -DMBEDTLS_CONFIG_FILE=\"\\\"/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/config.h\\\"\" -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_C_COMPILER=/usr/bin/cc" "-DCMAKE_CXX_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_CXX_COMPILER=/usr/bin/c++" "-DCMAKE_ASM_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_ASM_COMPILER=/usr/bin/cc" "-DCMAKE_BUILD_TYPE=Debug"
--- The C compiler identification is GNU 12.2.0
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/cc - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Found Python3: /usr/bin/python3.10 (found version "3.10.7") found components: Interpreter 
--- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS
--- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS - Success
+running: "cmake" "/home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor" "-DENABLE_PROGRAMS=OFF" "-DENABLE_TESTING=OFF" "-DCMAKE_INSTALL_PREFIX=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out" "-DCMAKE_C_FLAGS= -DMBEDTLS_CONFIG_FILE=\"\\\"/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/config.h\\\"\" -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_C_COMPILER=/usr/bin/cc" "-DCMAKE_CXX_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_CXX_COMPILER=/usr/bin/c++" "-DCMAKE_ASM_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_ASM_COMPILER=/usr/bin/cc" "-DCMAKE_BUILD_TYPE=Debug"
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
+-- Build files have been written to: /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
 running: "cmake" "--build" "." "--target" "lib" "--config" "Debug"
-[  1%] Building C object library/CMakeFiles/mbedcrypto.dir/aes.c.o
-[  2%] Building C object library/CMakeFiles/mbedcrypto.dir/aesni.c.o
-[  3%] Building C object library/CMakeFiles/mbedcrypto.dir/arc4.c.o
+Consolidate compiler generated dependencies of target mbedcrypto
+[  2%] Building C object library/CMakeFiles/mbedcrypto.dir/arc4.c.o
+[  2%] Building C object library/CMakeFiles/mbedcrypto.dir/aes.c.o
+[  3%] Building C object library/CMakeFiles/mbedcrypto.dir/aesni.c.o
 [  4%] Building C object library/CMakeFiles/mbedcrypto.dir/aria.c.o
 [  5%] Building C object library/CMakeFiles/mbedcrypto.dir/asn1parse.c.o
 [  6%] Building C object library/CMakeFiles/mbedcrypto.dir/asn1write.c.o
-[  7%] Building C object library/CMakeFiles/mbedcrypto.dir/base64.c.o
-[  8%] Building C object library/CMakeFiles/mbedcrypto.dir/bignum.c.o
+[  7%] Building C object library/CMakeFiles/mbedcrypto.dir/bignum.c.o
+[  8%] Building C object library/CMakeFiles/mbedcrypto.dir/base64.c.o
 [  9%] Building C object library/CMakeFiles/mbedcrypto.dir/blowfish.c.o
 [ 10%] Building C object library/CMakeFiles/mbedcrypto.dir/camellia.c.o
 [ 11%] Building C object library/CMakeFiles/mbedcrypto.dir/ccm.c.o
@@ -277,8 +269,8 @@ running: "cmake" "--build" "." "--target" "lib" "--config" "Debug"
 [ 17%] Building C object library/CMakeFiles/mbedcrypto.dir/cmac.c.o
 [ 18%] Building C object library/CMakeFiles/mbedcrypto.dir/ctr_drbg.c.o
 [ 19%] Building C object library/CMakeFiles/mbedcrypto.dir/des.c.o
-[ 21%] Building C object library/CMakeFiles/mbedcrypto.dir/ecdh.c.o
 [ 20%] Building C object library/CMakeFiles/mbedcrypto.dir/dhm.c.o
+[ 21%] Building C object library/CMakeFiles/mbedcrypto.dir/ecdh.c.o
 [ 22%] Building C object library/CMakeFiles/mbedcrypto.dir/ecdsa.c.o
 [ 23%] Building C object library/CMakeFiles/mbedcrypto.dir/ecjpake.c.o
 [ 24%] Building C object library/CMakeFiles/mbedcrypto.dir/ecp.c.o
@@ -304,12 +296,12 @@ running: "cmake" "--build" "." "--target" "lib" "--config" "Debug"
 [ 44%] Building C object library/CMakeFiles/mbedcrypto.dir/pk.c.o
 [ 45%] Building C object library/CMakeFiles/mbedcrypto.dir/pk_wrap.c.o
 [ 46%] Building C object library/CMakeFiles/mbedcrypto.dir/pkcs12.c.o
-[ 47%] Building C object library/CMakeFiles/mbedcrypto.dir/pkcs5.c.o
-[ 48%] Building C object library/CMakeFiles/mbedcrypto.dir/pkparse.c.o
+[ 47%] Building C object library/CMakeFiles/mbedcrypto.dir/pkparse.c.o
+[ 48%] Building C object library/CMakeFiles/mbedcrypto.dir/pkcs5.c.o
 [ 49%] Building C object library/CMakeFiles/mbedcrypto.dir/pkwrite.c.o
 [ 50%] Building C object library/CMakeFiles/mbedcrypto.dir/platform.c.o
-[ 51%] Building C object library/CMakeFiles/mbedcrypto.dir/platform_util.c.o
-[ 52%] Building C object library/CMakeFiles/mbedcrypto.dir/poly1305.c.o
+[ 51%] Building C object library/CMakeFiles/mbedcrypto.dir/poly1305.c.o
+[ 52%] Building C object library/CMakeFiles/mbedcrypto.dir/platform_util.c.o
 [ 53%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto.c.o
 [ 54%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_aead.c.o
 [ 55%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_cipher.c.o
@@ -323,23 +315,24 @@ running: "cmake" "--build" "." "--target" "lib" "--config" "Debug"
 [ 63%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_slot_management.c.o
 [ 64%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_storage.c.o
 [ 65%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_its_file.c.o
-[ 66%] Building C object library/CMakeFiles/mbedcrypto.dir/ripemd160.c.o
-[ 67%] Building C object library/CMakeFiles/mbedcrypto.dir/rsa.c.o
+[ 66%] Building C object library/CMakeFiles/mbedcrypto.dir/rsa.c.o
+[ 67%] Building C object library/CMakeFiles/mbedcrypto.dir/ripemd160.c.o
 [ 68%] Building C object library/CMakeFiles/mbedcrypto.dir/rsa_internal.c.o
 [ 69%] Building C object library/CMakeFiles/mbedcrypto.dir/sha1.c.o
 [ 70%] Building C object library/CMakeFiles/mbedcrypto.dir/sha256.c.o
 [ 71%] Building C object library/CMakeFiles/mbedcrypto.dir/sha512.c.o
 [ 72%] Building C object library/CMakeFiles/mbedcrypto.dir/threading.c.o
 [ 73%] Building C object library/CMakeFiles/mbedcrypto.dir/timing.c.o
-[ 74%] Building C object library/CMakeFiles/mbedcrypto.dir/version_features.c.o
-[ 75%] Building C object library/CMakeFiles/mbedcrypto.dir/version.c.o
+[ 74%] Building C object library/CMakeFiles/mbedcrypto.dir/version.c.o
+[ 75%] Building C object library/CMakeFiles/mbedcrypto.dir/version_features.c.o
 [ 76%] Building C object library/CMakeFiles/mbedcrypto.dir/xtea.c.o
 [ 77%] Linking C static library libmbedcrypto.a
 [ 77%] Built target mbedcrypto
+Consolidate compiler generated dependencies of target mbedx509
 [ 78%] Building C object library/CMakeFiles/mbedx509.dir/certs.c.o
-[ 79%] Building C object library/CMakeFiles/mbedx509.dir/x509_create.c.o
+[ 79%] Building C object library/CMakeFiles/mbedx509.dir/pkcs11.c.o
 [ 80%] Building C object library/CMakeFiles/mbedx509.dir/x509.c.o
-[ 81%] Building C object library/CMakeFiles/mbedx509.dir/pkcs11.c.o
+[ 81%] Building C object library/CMakeFiles/mbedx509.dir/x509_create.c.o
 [ 82%] Building C object library/CMakeFiles/mbedx509.dir/x509_crl.c.o
 [ 83%] Building C object library/CMakeFiles/mbedx509.dir/x509_crt.c.o
 [ 84%] Building C object library/CMakeFiles/mbedx509.dir/x509_csr.c.o
@@ -347,12 +340,13 @@ running: "cmake" "--build" "." "--target" "lib" "--config" "Debug"
 [ 86%] Building C object library/CMakeFiles/mbedx509.dir/x509write_csr.c.o
 [ 87%] Linking C static library libmbedx509.a
 [ 87%] Built target mbedx509
+Consolidate compiler generated dependencies of target mbedtls
 [ 88%] Building C object library/CMakeFiles/mbedtls.dir/debug.c.o
 [ 89%] Building C object library/CMakeFiles/mbedtls.dir/net_sockets.c.o
 [ 90%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cache.c.o
 [ 91%] Building C object library/CMakeFiles/mbedtls.dir/ssl_ciphersuites.c.o
-[ 92%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cli.c.o
-[ 93%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cookie.c.o
+[ 92%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cookie.c.o
+[ 93%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cli.c.o
 [ 94%] Building C object library/CMakeFiles/mbedtls.dir/ssl_msg.c.o
 [ 95%] Building C object library/CMakeFiles/mbedtls.dir/ssl_srv.c.o
 [ 96%] Building C object library/CMakeFiles/mbedtls.dir/ssl_ticket.c.o
@@ -361,14 +355,14 @@ running: "cmake" "--build" "." "--target" "lib" "--config" "Debug"
 [100%] Linking C static library libmbedtls.a
 [100%] Built target mbedtls
 [100%] Built target lib
-cargo:root=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out
-cargo:rustc-link-search=native=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library
-cargo:rustc-link-search=native=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/crypto/library
+cargo:root=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out
+cargo:rustc-link-search=native=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library
+cargo:rustc-link-search=native=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/crypto/library
 cargo:rustc-link-lib=mbedtls
 cargo:rustc-link-lib=mbedx509
 cargo:rustc-link-lib=mbedcrypto
 cargo:include=/home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor/include
-cargo:config_h=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/config.h
+cargo:config_h=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/config.h
 OPT_LEVEL = Some("0")
 TARGET = Some("x86_64-unknown-linux-gnu")
 HOST = Some("x86_64-unknown-linux-gnu")
