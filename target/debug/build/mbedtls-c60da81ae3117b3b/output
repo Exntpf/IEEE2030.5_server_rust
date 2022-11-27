@@ -1,7 +1,7 @@
-cargo:rustc-cfg=sys_threading_component="pthread"
-cargo:rustc-cfg=sys_std_component="fs"
 cargo:rustc-cfg=sys_std_component="net"
+cargo:rustc-cfg=sys_std_component="fs"
 cargo:rustc-cfg=sys_std_component="entropy"
+cargo:rustc-cfg=sys_threading_component="pthread"
 cargo:rustc-cfg=sys_time_component="libc"
 TARGET = Some("x86_64-unknown-linux-gnu")
 OPT_LEVEL = Some("0")

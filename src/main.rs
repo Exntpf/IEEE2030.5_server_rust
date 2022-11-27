@@ -25,16 +25,10 @@ extern crate mbedtls;
 use mbedtls::{rng::{CtrDrbg, OsEntropy}};
 use mbedtls::pk::Pk; 
 use mbedtls::ssl::config::{Endpoint, Preset, Transport};
-use mbedtls::ssl::{Config, Context, ciphersuites::{CipherSuite}, Version};
-use mbedtls::x509::{Certificate, VerifyError};
+use mbedtls::ssl::{Config, Context, ciphersuites::{CipherSuite}};
+use mbedtls::x509::{Certificate};
 
 use std::sync::Arc;
-
-const RSA_KEY_SIZE: u32 = 3072;
-const RSA_KEY_EXP: u32 = 0x10001;
-const DAYS_TO_SES: u64 = 86400;
-const CERT_VAL_SECS: u64 = 365 * DAYS_TO_SES;
-
 
 fn run_client() -> i32{
     return connect_to_server();
@@ -83,7 +77,9 @@ fn connect_to_server() -> i32{
     // could do some error checking here.
     let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
     let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
-    config.push_cert(server_cert, key);
+    if let Err(a) = config.push_cert(server_cert, key){
+        println!("client: ERR: {a}\nCould not load certificate to mbedtls config");
+    }
     
     /* 
      * as 2030.5 client cannot connect to a server with a self-signed
@@ -112,7 +108,9 @@ fn connect_to_server() -> i32{
     println!("Client: Get message sent successfully.");
 
     let mut buf = [0u8; 13 + 1 + 4];
-    ctx.read_exact(&mut buf);
+    if let Err(a) = ctx.read_exact(&mut buf){
+        println!("client: ERR: {a}\ncould not read server data into buffer");
+    }
     // assert_eq!(&buf, format!("Cipher suite: c0ae").as_bytes());
 
     println!("Client: Received server response: {:#?}", buf);
@@ -193,7 +191,7 @@ fn run_server() -> i32{
 // }
 
 // fn server_handle_connection(mut stream: TcpStream, key: Pk, cert: List<Certificate>){
-fn server_handle_connection(mut stream: TcpStream){
+fn server_handle_connection(stream: TcpStream){
     
     let mut config = Config::new(Endpoint::Server, Transport::Stream, Preset::Default);
     
@@ -206,15 +204,15 @@ fn server_handle_connection(mut stream: TcpStream){
     // Firefox does not consider this secure communication, so cannot establish a connection with this server.
     let ciphersuite_list: Vec<i32> = vec![
         CipherSuite::EcdheEcdsaWithAes128Ccm8.into(),
-        // CipherSuite::EcdheEcdsaWithAes256CbcSha384.into(), CipherSuite::EcdheEcdsaWithAes128CbcSha256.into(),
-        // CipherSuite::EcdheEcdsaWithAes256GcmSha384.into(), CipherSuite::EcdheEcdsaWithAes128GcmSha256.into(), 
+        CipherSuite::EcdheEcdsaWithAes256CbcSha384.into(), CipherSuite::EcdheEcdsaWithAes128CbcSha256.into(),
+        CipherSuite::EcdheEcdsaWithAes256GcmSha384.into(), CipherSuite::EcdheEcdsaWithAes128GcmSha256.into(), 
          0];
 
     config.set_ciphersuites(Arc::new(ciphersuite_list));
 
 
     // read .pem files
-    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/server_cert_selfSigned.pem")
+    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/server1_cert.pem")
         .expect("Could not read server certificate .pem file\n");
     let mut private_key_contents = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/server1_private_key.pem")
         .expect("Could not read private key .pem file\n");
@@ -230,7 +228,9 @@ fn server_handle_connection(mut stream: TcpStream){
     // could do some error checking here.
     let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
     let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
-    config.push_cert(server_cert, key);
+    if let Err(a) = config.push_cert(server_cert, key){
+        println!("server: ERR: {a}\nCould not load certificate to mbedtls config");
+    }
 
     let mut ctx = Context::new(Arc::new(config));
     // so far so good - above code aligns with client_server.rs test on mbedtls GitHub repo.
@@ -249,7 +249,7 @@ fn server_handle_connection(mut stream: TcpStream){
     let mut server_buf = [0u8; 100];
     ctx.read_exact(&mut server_buf).unwrap();
     let full_request = String::from_utf8_lossy(&server_buf);
-    println!("Server recieved request: {}", full_request);
+    println!("Server recieved request ->\n{}", full_request);
 
     let http_request_line = full_request.lines().next().unwrap();
     let (status_line, http_file) = match http_request_line {
@@ -258,7 +258,7 @@ fn server_handle_connection(mut stream: TcpStream){
         },
         _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
     };
-    println!("request line: {}\nreturned status line: {}",http_request_line, status_line);
+    println!("returned status line -> {}", status_line);
     
     let content = fs::read_to_string(http_file).unwrap(); // this might return Err if file not found.
 
@@ -269,8 +269,12 @@ fn server_handle_connection(mut stream: TcpStream){
     let content_length = content.len();
     let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
     // let response = format!("{content}");
+    match ctx.write_all(response.as_bytes()){
+        Ok(_) => println!("server: response sent to client."),
+        Err(a) => println!("server: ERR: {a}\nresponse not sent to client"),
+    }
     println!("full server response: {}",  response);
-    ctx.write_all(response.as_bytes()).unwrap();
+    
 
     // let ciphersuite = ctx.ciphersuite().unwrap();
     // ctx.write_all(format!("Cipher suite: {:4x}", ciphersuite).as_bytes());
