@@ -1,9 +1,9 @@
 cargo:rustc-cfg=threading_component="pthread"
-cargo:rustc-cfg=std_component="entropy"
+cargo:rustc-cfg=time_component="libc"
 cargo:rustc-cfg=std_component="net"
 cargo:rustc-cfg=std_component="fs"
-cargo:rustc-cfg=time_component="libc"
-cargo:platform-components=threading_component=pthread,std_component=entropy,std_component=net,std_component=fs,time_component=libc
+cargo:rustc-cfg=std_component="entropy"
+cargo:platform-components=threading_component=pthread,time_component=libc,std_component=net,std_component=fs,std_component=entropy
 cargo:rerun-if-env-changed=RUST_MBEDTLS_SYS_SOURCE
 cargo:rerun-if-changed=vendor/CMakeLists.txt
 cargo:rerun-if-changed=vendor/include/mbedtls/config_psa.h
@@ -245,22 +245,15 @@ CMAKE_x86_64_unknown_linux_gnu = None
 HOST_CMAKE = None
 CMAKE = None
 running: "cmake" "/home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor" "-DENABLE_PROGRAMS=OFF" "-DENABLE_TESTING=OFF" "-DCMAKE_INSTALL_PREFIX=/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out" "-DCMAKE_C_FLAGS= -DMBEDTLS_CONFIG_FILE=\"\\\"/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/config.h\\\"\" -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_C_COMPILER=/usr/bin/cc" "-DCMAKE_CXX_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_CXX_COMPILER=/usr/bin/c++" "-DCMAKE_ASM_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_ASM_COMPILER=/usr/bin/cc" "-DCMAKE_BUILD_TYPE=Debug"
--- The C compiler identification is GNU 12.2.0
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/cc - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Found Python3: /usr/bin/python3.10 (found version "3.10.8") found components: Interpreter 
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
 running: "cmake" "--build" "." "--target" "lib" "--config" "Debug"
 Consolidate compiler generated dependencies of target mbedcrypto
 [  1%] Building C object library/CMakeFiles/mbedcrypto.dir/aes.c.o
-[  2%] Building C object library/CMakeFiles/mbedcrypto.dir/aesni.c.o
-[  3%] Building C object library/CMakeFiles/mbedcrypto.dir/arc4.c.o
-[  4%] Building C object library/CMakeFiles/mbedcrypto.dir/aria.c.o
+[  2%] Building C object library/CMakeFiles/mbedcrypto.dir/aria.c.o
+[  3%] Building C object library/CMakeFiles/mbedcrypto.dir/aesni.c.o
+[  4%] Building C object library/CMakeFiles/mbedcrypto.dir/arc4.c.o
 [  5%] Building C object library/CMakeFiles/mbedcrypto.dir/asn1parse.c.o
 [  6%] Building C object library/CMakeFiles/mbedcrypto.dir/asn1write.c.o
 [  7%] Building C object library/CMakeFiles/mbedcrypto.dir/base64.c.o
@@ -269,11 +262,11 @@ Consolidate compiler generated dependencies of target mbedcrypto
 [ 10%] Building C object library/CMakeFiles/mbedcrypto.dir/camellia.c.o
 [ 11%] Building C object library/CMakeFiles/mbedcrypto.dir/ccm.c.o
 [ 12%] Building C object library/CMakeFiles/mbedcrypto.dir/chacha20.c.o
-[ 13%] Building C object library/CMakeFiles/mbedcrypto.dir/cipher.c.o
-[ 14%] Building C object library/CMakeFiles/mbedcrypto.dir/chachapoly.c.o
-[ 15%] Building C object library/CMakeFiles/mbedcrypto.dir/cipher_wrap.c.o
-[ 16%] Building C object library/CMakeFiles/mbedcrypto.dir/constant_time.c.o
-[ 17%] Building C object library/CMakeFiles/mbedcrypto.dir/cmac.c.o
+[ 13%] Building C object library/CMakeFiles/mbedcrypto.dir/chachapoly.c.o
+[ 14%] Building C object library/CMakeFiles/mbedcrypto.dir/cipher_wrap.c.o
+[ 15%] Building C object library/CMakeFiles/mbedcrypto.dir/cipher.c.o
+[ 16%] Building C object library/CMakeFiles/mbedcrypto.dir/cmac.c.o
+[ 17%] Building C object library/CMakeFiles/mbedcrypto.dir/constant_time.c.o
 [ 18%] Building C object library/CMakeFiles/mbedcrypto.dir/ctr_drbg.c.o
 [ 19%] Building C object library/CMakeFiles/mbedcrypto.dir/des.c.o
 [ 20%] Building C object library/CMakeFiles/mbedcrypto.dir/dhm.c.o
@@ -308,16 +301,16 @@ Consolidate compiler generated dependencies of target mbedcrypto
 [ 49%] Building C object library/CMakeFiles/mbedcrypto.dir/pkwrite.c.o
 [ 50%] Building C object library/CMakeFiles/mbedcrypto.dir/platform.c.o
 [ 51%] Building C object library/CMakeFiles/mbedcrypto.dir/platform_util.c.o
-[ 52%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto.c.o
-[ 53%] Building C object library/CMakeFiles/mbedcrypto.dir/poly1305.c.o
+[ 52%] Building C object library/CMakeFiles/mbedcrypto.dir/poly1305.c.o
+[ 53%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto.c.o
 [ 54%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_aead.c.o
 [ 55%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_cipher.c.o
 [ 56%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_client.c.o
 [ 57%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_driver_wrappers.c.o
 [ 58%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_ecp.c.o
 [ 59%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_hash.c.o
-[ 60%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_rsa.c.o
-[ 61%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_mac.c.o
+[ 60%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_mac.c.o
+[ 61%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_rsa.c.o
 [ 62%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_se.c.o
 [ 63%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_slot_management.c.o
 [ 64%] Building C object library/CMakeFiles/mbedcrypto.dir/psa_crypto_storage.c.o
@@ -336,8 +329,8 @@ Consolidate compiler generated dependencies of target mbedcrypto
 [ 77%] Linking C static library libmbedcrypto.a
 [ 77%] Built target mbedcrypto
 Consolidate compiler generated dependencies of target mbedx509
-[ 78%] Building C object library/CMakeFiles/mbedx509.dir/certs.c.o
-[ 79%] Building C object library/CMakeFiles/mbedx509.dir/pkcs11.c.o
+[ 78%] Building C object library/CMakeFiles/mbedx509.dir/pkcs11.c.o
+[ 79%] Building C object library/CMakeFiles/mbedx509.dir/certs.c.o
 [ 80%] Building C object library/CMakeFiles/mbedx509.dir/x509.c.o
 [ 81%] Building C object library/CMakeFiles/mbedx509.dir/x509_create.c.o
 [ 82%] Building C object library/CMakeFiles/mbedx509.dir/x509_crl.c.o
@@ -349,8 +342,8 @@ Consolidate compiler generated dependencies of target mbedx509
 [ 87%] Built target mbedx509
 Consolidate compiler generated dependencies of target mbedtls
 [ 88%] Building C object library/CMakeFiles/mbedtls.dir/debug.c.o
-[ 89%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cache.c.o
-[ 90%] Building C object library/CMakeFiles/mbedtls.dir/net_sockets.c.o
+[ 89%] Building C object library/CMakeFiles/mbedtls.dir/net_sockets.c.o
+[ 90%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cache.c.o
 [ 91%] Building C object library/CMakeFiles/mbedtls.dir/ssl_ciphersuites.c.o
 [ 92%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cli.c.o
 [ 93%] Building C object library/CMakeFiles/mbedtls.dir/ssl_cookie.c.o
