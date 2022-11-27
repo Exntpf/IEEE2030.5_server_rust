@@ -15,7 +15,7 @@ MBEDTLS_CCM_C -> defined
 use std::{
     env,
     fs::{File, self},
-    io::{ Write, BufRead, BufReader},
+    io::{ Write, BufRead, BufReader, Read},
     net::{TcpListener, TcpStream},
 };
 
@@ -187,12 +187,34 @@ fn server_handle_connection(stream: TcpStream){
         },
     };
 
-    let ciphersuite = ctx.ciphersuite().unwrap();
-    match ctx.write_all(format!("Cipher suite: {:4x}", ciphersuite).as_bytes()){
-        Ok(_) => println!("server: response sent to client."),
-        Err(a) => println!("server: ERR {a}: can't send response to client"),
-    }
+    let mut server_buf = [0u8; 100];
+    ctx.read_exact(&mut server_buf).unwrap();
+    let full_request = String::from_utf8_lossy(&server_buf);
+    println!("server: request received ->\n{}", full_request);
 
+    let http_request_line = full_request.lines().next().unwrap();
+    let (status_line, http_file) = match http_request_line {
+        "GET /dcap HTTP/1.1" => {
+            ("HTTP/1.1 200 OK", "hello.html")
+        },
+        _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
+    };
+    println!("request line -> {}\nreturned status line -> {}",http_request_line, status_line);
+    
+    let content = fs::read_to_string(http_file).unwrap(); // this might return Err if file not found.
+
+    // for the server, could use the error here as a way to check if the file/resource exists
+    // but it still feels better to have a whitelist of the services offered by the server, compare 
+    // the request against that,
+    // and then have a function encapsulate the getting of the resource from the file.
+    let content_length = content.len();
+    let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
+    // let response = format!("{content}");
+    match ctx.write_all(response.as_bytes()){
+        Ok(_) => println!("server: reponse sent to client"),
+        Err(a) => println!("server: ERR: {a}\nresponse not sent to client"),
+    }
+    println!("full server response->\n{}",  response);
     // let buf_reader = BufReader::new(session);
     // let http_request_line = buf_reader
     //     .lines()
