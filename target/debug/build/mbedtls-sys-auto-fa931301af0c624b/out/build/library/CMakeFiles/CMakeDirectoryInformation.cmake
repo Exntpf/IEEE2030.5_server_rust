@@ -3,7 +3,7 @@
 
 # Relative path conversion top directories.
 set(CMAKE_RELATIVE_PATH_TOP_SOURCE "/home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor")
-set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build")
+set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build")
 
 # Force unix paths in dependencies.
 set(CMAKE_FORCE_UNIX_PATHS 1)

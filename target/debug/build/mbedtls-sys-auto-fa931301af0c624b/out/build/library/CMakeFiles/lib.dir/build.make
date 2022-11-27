@@ -56,7 +56,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
+CMAKE_BINARY_DIR = /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
 
 # Utility rule file for lib.
 
@@ -79,10 +79,10 @@ library/CMakeFiles/lib.dir/build: lib
 .PHONY : library/CMakeFiles/lib.dir/build
 
 library/CMakeFiles/lib.dir/clean:
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library && $(CMAKE_COMMAND) -P CMakeFiles/lib.dir/cmake_clean.cmake
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library && $(CMAKE_COMMAND) -P CMakeFiles/lib.dir/cmake_clean.cmake
 .PHONY : library/CMakeFiles/lib.dir/clean
 
 library/CMakeFiles/lib.dir/depend:
-	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor /home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor/library /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library/CMakeFiles/lib.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor /home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor/library /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/library/CMakeFiles/lib.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : library/CMakeFiles/lib.dir/depend
 

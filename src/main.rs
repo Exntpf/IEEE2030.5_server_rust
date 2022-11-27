@@ -137,7 +137,7 @@ fn run_server() -> i32{
 // }
 
 // fn server_handle_connection(mut stream: TcpStream, key: Pk, cert: List<Certificate>){
-fn server_handle_connection(mut stream: TcpStream){
+fn server_handle_connection(stream: TcpStream){
 
     let entropy = OsEntropy::new();
     let rng = Arc::new(CtrDrbg::new(Arc::new(entropy), None).unwrap());
@@ -164,7 +164,11 @@ fn server_handle_connection(mut stream: TcpStream){
     // could do some error checking here.
     let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
     let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
-    config.push_cert(server_cert, key);
+    match config.push_cert(server_cert, key){
+        Ok(_) => println!("server: certificate loaded successfully."),
+        Err(a) => println!("server: ERR {a}: certificate was not loaded successfully."),
+    }
+
 
     // let cert = Arc::new(Certificate::from_pem_multiple(keys::EXPIRED_CERT.as_bytes())?);
     // let key = Arc::new(Pk::from_private_key(keys::EXPIRED_KEY.as_bytes(), None)?);
@@ -173,18 +177,21 @@ fn server_handle_connection(mut stream: TcpStream){
     let mut ctx = Context::new(Arc::new(config));
     // so far so good - above code aligns with client_server.rs test on mbedtls GitHub repo.
 
-    let session = match ctx.establish(stream, None) {
+    match ctx.establish(stream, None) {
         Ok(()) => {
             println!("Conneciton Established!");
         },
         Err(a) => {
-            println!("Error establishing connection. Code: {}", a);
+            println!("server: ERR {a}: Could not establish connection");
             return;
         },
     };
 
     let ciphersuite = ctx.ciphersuite().unwrap();
-    ctx.write_all(format!("Cipher suite: {:4x}", ciphersuite).as_bytes());
+    match ctx.write_all(format!("Cipher suite: {:4x}", ciphersuite).as_bytes()){
+        Ok(_) => println!("server: response sent to client."),
+        Err(a) => println!("server: ERR {a}: can't send response to client"),
+    }
 
     // let buf_reader = BufReader::new(session);
     // let http_request_line = buf_reader

@@ -60,7 +60,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /home/neel/.cargo/registry/src/github.com-1ecc6299db9ec823/mbedtls-sys-auto-2.28.0/vendor
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
+CMAKE_BINARY_DIR = /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -132,9 +132,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/2030_server_TLS/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/target/debug/build/mbedtls-sys-auto-fa931301af0c624b/out/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
