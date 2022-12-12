@@ -503,13 +503,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "server_code"
-version = "0.1.0"
-dependencies = [
- "mbedtls",
-]
-
-[[package]]
 name = "shlex"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -559,6 +552,14 @@ dependencies = [
  "libc",
  "wasi",
  "winapi",
+]
+
+[[package]]
+name = "tls_server_client"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "mbedtls",
 ]
 
 [[package]]
