@@ -93,12 +93,11 @@ fn connect_to_server() -> i32{ // to make this return Result in the future so we
     let private_key_bytes: &[u8] = &private_key_contents;
     // client is reading in the certificates.
     
-    // generate certificate, private key, and push to Config.
-    // could do some error checking here.
     let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
     let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
     if let Err(a) = config.push_cert(server_cert, key){
         println!("client: ERR: {a}\nCould not load certificate to mbedtls config");
+        return -1;
     }
     
     /* 
@@ -196,10 +195,13 @@ fn server_handle_connection(stream: TcpStream){
     let full_request = String::from_utf8_lossy(&server_buf);
     println!("Server recieved request ->\n{}", full_request);
 
-    let http_request_line = full_request.lines().next().unwrap();
+    let http_request_line = full_request
+                                    .lines()
+                                    .next()
+                                    .unwrap();
     let (status_line, http_file) = match http_request_line {
         "GET /dcap HTTP/1.1" => {
-            ("HTTP/1.1 200 OK", "devCapMsg.html")
+            ("HTTP/1.1 200 OK", "hello.html")
         },
         _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
     };
@@ -214,6 +216,7 @@ fn server_handle_connection(stream: TcpStream){
     let content_length = content.len();
     let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
     // let response = format!("{content}");
+    
     match ctx.write_all(response.as_bytes()){
         Ok(_) => println!("server: response sent to client."),
         Err(a) => println!("server: ERR: {a}\nresponse not sent to client"),
