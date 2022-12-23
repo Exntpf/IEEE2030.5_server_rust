@@ -13,7 +13,6 @@ use bitflags::bitflags;
  * DstRuleType p166
  * GPSLocationType.lat and GPSLocationType.lon constructer that does error checking p167
  */
-
 type DstRuleType = HexBinary32;
 
 type LocaleType = String42;
@@ -196,17 +195,32 @@ impl PrimacyType {
 }
 
 
-#[repr(UInt8)]
-enum DataQualifierType {
-    NotApplicable = 0,
-    Average = 2,
-    Maximum = 8,
-    Minimum = 9,
-    Normal = 12,
-    Standard_deviation_ofPopulation = 29,
-    Standard_deviation_ofSample = 30,
+struct UnitValueType {
+    multiplier: PowerOfTenMultiplierType,
+    unit: UomType,
+    value: Int48,
 }
 
+#[repr(UInt8)]
+enum AccumulationBehaviourType {
+    NotApplicable = 0,
+    Cumulative = 3,
+    DeltaData = 4,
+    Indicating = 6,
+    Summation = 9,
+    Instantaneous = 12,
+}
+
+impl Default for AccumulationBehaviourType {
+    fn default() -> Self { AccumulationBehaviourType::NotApplicable }
+}
+
+// p162
+#[repr(UInt8)]
+enum ApplianceLoadReductionType{
+    DelayApplianceLoad = 0,
+    TemporaryApplianceLoadReduction = 1,
+}
 
 #[repr(UInt8)]
 enum CommodityType {
@@ -223,6 +237,63 @@ enum CommodityType {
     CoolingFluid = 13,
 }
 
+impl Default for CommodityType {
+    fn default() -> Self { CommodityType::NotApplicable }
+}
+
+
+#[repr(UInt8)]
+enum ConsumptionBlockType {
+    NotApplicable = 0,
+    Block1 = 1,
+    Block2 = 2,
+    Block3 = 3,
+    Block4 = 4,
+    Block5 = 5,
+    Block6 = 6,
+    Block7 = 7,
+    Block8 = 8,
+    Block9 = 9,
+    Block10 = 10,
+    Block11 = 11,
+    Block12 = 12,
+    Block13 = 13,
+    Block14 = 14,
+    Block15 = 15,
+    Block16 = 16,
+}
+
+impl Default for ConsumptionBlockType {
+    fn default() -> Self { ConsumptionBlockType::NotApplicable }
+}
+
+// p164
+#[repr(UInt8)]
+enum CurrencyCode{
+    NotApplicable = 0,
+    TemporaryApplianceLoadReduction = 1,
+}
+
+impl Default for CurrencyCode {
+    fn default() -> Self { CurrencyCode::NotApplicable }
+}
+
+
+#[repr(UInt8)]
+enum DataQualifierType {
+    NotApplicable = 0,
+    Average = 2,
+    Maximum = 8,
+    Minimum = 9,
+    Normal = 12,
+    StandardDeviationOfPopulation = 29,
+    StandardDeviationOfSample = 30,
+}
+
+impl Default for DataQualifierType {
+    fn default() -> Self { DataQualifierType::NotApplicable }
+}
+
 
 #[repr(UInt8)]
 enum FlowDirectionType {
@@ -231,25 +302,88 @@ enum FlowDirectionType {
     Reverse = 19,
 }
 
+impl Default for FlowDirectionType {
+    fn default() -> Self { FlowDirectionType::NotApplicable }
+}
+
+
+#[repr(UInt8)]
+enum KindType {
+    NotApplicable = 0,
+    Currency = 3,
+    Demand = 8,
+    Energy = 12,
+    Power = 37,
+}
+
+impl Default for KindType {
+    fn default() -> Self { KindType::NotApplicable }
+}
+
+
+#[repr(UInt8)]
+enum PhaseCode {
+    NotApplicable = 0,
+    PhaseC = 32, // and S2
+    PhaseCN = 33, // and S2N
+    PhaseCA = 40,
+    PhaseB = 64,
+    PhaseBN = 65,
+    PhaseBC = 66,
+    PhaseA = 128, // and S1
+    PhaseAN = 129, // and S1N
+    PhaseAB = 132,
+    PhaseABC = 224,
+}
+
+impl Default for PhaseCode {
+    fn default() -> Self { PhaseCode::NotApplicable }
+}
+
+
+#[repr(UInt8)]
+enum ServiceKind {
+    Electricity = 0,
+    Gas = 1,
+    Water = 2,
+    Time = 3,
+    Pressure = 4,
+    Heat = 5,
+    Cooling = 6,
+}
+
+// «XSDsimpleType»
+#[repr(UInt8)]
+enum SubscribableType {
+    NoSubscriptionsSupported = 0,
+    NonConditionalSubscriptions = 1,
+    ConditionalSubscriptions = 2,
+    AllSubscriptions = 3,
+}
+
 
 #[repr(UInt8)]
 enum TOUType {
     NotApplicable = 0,
-    TOU_A = 1,
-    TOU_B = 2,
-    TOU_C = 3,
-    TOU_D = 4,
-    TOU_E = 5,
-    TOU_F = 6,
-    TOU_G = 7,
-    TOU_H = 8,
-    TOU_I = 9,
-    TOU_J = 10,
-    TOU_K = 11,
-    TOU_L = 12,
-    TOU_M = 13,
-    TOU_N = 14,
-    TOU_O = 15,
+    TouA = 1,
+    TouB = 2,
+    TouC = 3,
+    TouD = 4,
+    TouE = 5,
+    TouF = 6,
+    TouG = 7,
+    TouH = 8,
+    TouI = 9,
+    TouJ = 10,
+    TouK = 11,
+    TouL = 12,
+    TouM = 13,
+    TouN = 14,
+    TouO = 15,
+}
+
+impl Default for TOUType {
+    fn default() -> Self { TOUType::NotApplicable }
 }
 
 
@@ -270,11 +404,6 @@ enum  UnitType {
     Unitless = 12,
 }
 
-struct UnitValueType {
-    multiplier: PowerOfTenMultiplierType,
-    unit: UomType,
-    value: Int48,
-}
 
 #[repr(UInt8)]
 enum UomType {
@@ -312,117 +441,8 @@ enum UomType {
     Therm = 169,
 }
 
-
-#[repr(UInt8)]
-enum AccumlationBehaviourType {
-    NotApplicable = 0,
-    Cumulative = 3,
-    DeltaData = 4,
-    Indicating = 6,
-    Summation = 9,
-    Instantaneous = 12,
-}
-
-// p162
-#[repr(UInt8)]
-enum ApplianceLoadReductionType{
-    DelayApplianceLoad = 0,
-    TemporaryApplianceLoadReduction = 1,
-}
-
-// p164
-#[repr(UInt8)]
-enum CurrencyCode{
-    NotApplicable = 0,
-    TemporaryApplianceLoadReduction = 1,
-}
-
-
-#[repr(UInt8)]
-enum ServiceKind {
-    Electricity = 0,
-    Gas = 1,
-    Water = 2,
-    Time = 3,
-    Pressure = 4,
-    Heat = 5,
-    Cooling = 6,
-}
-
-
-#[repr(UInt8)]
-enum ConsumptionBlockType {
-    NotApplicable = 0,
-    Block_1 = 1,
-    Block_2 = 2,
-    Block_3 = 3,
-    Block_4 = 4,
-    Block_5 = 5,
-    Block_6 = 6,
-    Block_7 = 7,
-    Block_8 = 8,
-    Block_9 = 9,
-    Block_10 = 10,
-    Block_11 = 11,
-    Block_12 = 12,
-    Block_13 = 13,
-    Block_14 = 14,
-    Block_15 = 15,
-    Block_16 = 16,
-}
-
-
-// «XSDsimpleType»
-#[repr(UInt8)]
-enum SubscribableType {
-    NoSubscriptionsSupported = 0,
-    NonConditionalSubscriptions = 1,
-    ConditionalSubscriptions = 2,
-    AllSubscriptions = 3,
-}
-
-
-#[repr(UInt8)]
-enum DERCurveType {
-    OpModFreqWatt = 0,
-    OpModHFRTMayTrip = 1,
-    OpModHFRTMustTrip = 2,
-    OpModHVRTMayTrip = 3,
-    OpModHVRTMomentaryCessation = 4,
-    OpModHVRTMustTrip = 5,
-    OpModLFRTMayTrip = 6,
-    OpModLFRTMustTrip = 7,
-    OpModLVRTMayTrip = 8,
-    OpModLVRTMomentaryCessation = 9,
-    OpModLVRTMustTrip = 10,
-    OpModVoltVar = 11,
-    OpModVoltWatt = 12,
-    OpModWattPF = 13,
-    OpModWattVar = 14,
-}
-
-#[repr(UInt8)]
-enum KindType {
-    NotApplicable = 0,
-    Currency = 3,
-    Demand = 8,
-    Energy = 12,
-    Power = 37,
-}
-
-#[repr(UInt8)]
-enum PhaseCode {
-    NotApplicable = 0,
-    Phase_C = 32, // and S2
-    Phase_CN = 33, // and S2N
-    Phase_CA = 40,
-    Phase_B = 64,
-    Phase_BN = 65,
-    Phase_BC = 66,
-    Phase_A = 128, // and S1
-    Phase_AN = 129, // and S1N
-    Phase_AB = 132,
-    Phase_ABC = 224,
+impl Default for UomType {
+    fn default() -> Self { UomType::NotApplicable }
 }
 
 
@@ -455,7 +475,7 @@ bitflags! {
         const InteriorLighting = 4096;
         const LoadControlSwitch = 8192;
         const Energy_managementSystem = 16384;
-        const Smart_energy_module = 65536;
+        const SmartEnergyModule = 65536;
         const ElectricVehicle = 262144;
         const VirutalOrMixedDer = 524288;
         const ReciprocatingEngine = 2097152;

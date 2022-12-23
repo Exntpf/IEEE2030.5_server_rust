@@ -1,33 +1,68 @@
+
+#[repr(UInt8)]
+enum DERCurveType {
+    OpModFreqWatt = 0,
+    OpModHFRTMayTrip = 1,
+    OpModHFRTMustTrip = 2,
+    OpModHVRTMayTrip = 3,
+    OpModHVRTMomentaryCessation = 4,
+    OpModHVRTMustTrip = 5,
+    OpModLFRTMayTrip = 6,
+    OpModLFRTMustTrip = 7,
+    OpModLVRTMayTrip = 8,
+    OpModLVRTMomentaryCessation = 9,
+    OpModLVRTMustTrip = 10,
+    OpModVoltVar = 11,
+    OpModVoltWatt = 12,
+    OpModWattPF = 13,
+    OpModWattVar = 14,
+}
+
+
+enum DERType {
+    NaUnknown = 0,
+    VirtualOrMixedDER = 1,
+    ReciprocatingEngine = 2,
+    FuelCell = 3,
+    PvSystem = 4,
+    CombinedHeatPower = 5,
+    OtherPeneration = 6,
+    OtherStorage = 80,
+    ElectricVehicle = 81,
+    EVSE = 82,
+    CombinedPvStorage = 83,
+}
+
 enum InverterStatusType {
     NA = 0,
     Off = 1,
     Sleeping = 2,
-    Start_up = 3,
-    Tracking_mppt = 4,
-    Forced_power_reduction = 15,
-    Shutting_down = 6,
-    One_or_more_faults = 7,
+    StartUp = 3,
+    TrackingMppt = 4,
+    ForcedPowerReduction = 15,
+    ShuttingDown = 6,
+    OneOrMoreFaults = 7,
     Standby = 8,
-    Test_mode = 9,
-    defined_in_manufacturer_status = 10,
+    TestMode = 9,
+    DefinedInManufacturerStatus = 10,
 }
 
 enum LocalControlModeStatusType {
-    Local_control = 0,
-    Remote_control = 1,
+    LocalControl = 0,
+    RemoteControl = 1,
 }
 
 
 enum OperationalModeStatusType {
     NA = 0,
     Off = 1,
-    Operational_mode = 2,
-    Test_mode = 3,
+    OperationalMode = 2,
+    TestMode = 3,
 }
 
 
 enum StorageModeStatusType {
-    Storage_charging = 0,
-    Storage_discharging = 1,
-    Storage_holding = 2,
+    StorageCharging = 0,
+    StorageDischarging = 1,
+    StorageHolding = 2,
 }

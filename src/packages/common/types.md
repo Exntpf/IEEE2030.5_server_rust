@@ -36,10 +36,3 @@ TOUType
 UnitType
 UomType
 VersionType
-
-# types we have to implement (not defined in evolve)
-ApplianceLoadReductionType
-ChargeKind
-CurrencyCode
-PriorityType
-UnitType
