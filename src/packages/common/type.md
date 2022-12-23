@@ -1,0 +1,45 @@
+# Common 2030 types:
+
+Page 162 - 173
+
+AccumulationBehaviourType
+ApplianceLoadReductionType
+ChargeKind
+CommodityType
+ConsumptionBlockType
+CurrencyCode
+DataQualifierType
+DERControlType
+DERCurveType
+DERType
+DeviceCategoryType
+DstRuleType
+FlowDirectionType
+KindType
+LocaleType
+mRIDType
+OneHourRangeType
+PENType
+PerCent
+PhaseCode
+PINType
+PowerOfTenMultiplierType
+PriorityType
+RoleFlagsType
+ServiceKind
+SFDIType
+SignedPerCent
+SubscribableType
+TimeOffsetType
+TimeType
+TOUType
+UnitType
+UomType
+VersionType
+
+# types we have to implement (not defined in evolve)
+ApplianceLoadReductionType
+ChargeKind
+CurrencyCode
+PriorityType
+UnitType
