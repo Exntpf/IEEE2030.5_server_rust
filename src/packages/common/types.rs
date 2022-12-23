@@ -1,9 +1,9 @@
-    /*
-    * Described in detail in section B.2.3.4.
-    *  Specifically, it contains type aliases for
-    * data types used for various function sets 
-    * (e.g. TimeType is a 64-bit integer or "Int64")
-    */
+/*
+* Described in detail in section B.2.3.4.
+* Specifically, it contains type aliases for
+* data types used for various function sets 
+* (e.g. TimeType is a 64-bit integer or "Int64")
+*/
 use primitives;
 use std::io::{Error, ErrorKind};
 use bitflags::bitflags;
