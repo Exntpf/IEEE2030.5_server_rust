@@ -7,17 +7,16 @@
 // Attribute data
 #[derive(Default)]
 struct AnyURI {
-    elements: <String6>,
+    path: &str,
 }
 
 impl AnyURI {
-    pub fn get_full_uri(&self) -> String {
-        let mut output = String::new();
-        for elem in &self.path {
-            output.push_str("\\");
-            output.push_str(&elem);
-        }
-        output
+    pub fn new(path: String) -> AnyURI {
+        AnyURI{ path.as_str() }
+    }
+
+    pub fn get_uri(&self) -> &str {
+        self.path
     }
 }
 
@@ -52,7 +51,7 @@ trait Identified {
 // Data Containers
 #[derive(Default)]
 struct ResourceData {
-    href: AnyURI,
+    pub href: AnyURI,
 }
 
 #[derive(Default)]

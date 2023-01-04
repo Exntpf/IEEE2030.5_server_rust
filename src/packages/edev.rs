@@ -1,0 +1,3 @@
+/*
+ * EndDevice Resource function set
+ */

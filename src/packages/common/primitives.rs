@@ -1,8 +1,8 @@
 /* 
  * Described in detail in section B.2.3.5.
- pub * Specifically, it contains  type for = aliases 
- pub * primitive, concrete data types
- pub *  (e.g. Int64 is the type i64 in rust)
+ * Specifically, it contains  type for = aliases 
+ * primitive, concrete data types
+ *  (e.g. Int64 is the type i64 in rust)
  */
 use arrayvec::ArrayString;
 use num_bigint::BigUint;
