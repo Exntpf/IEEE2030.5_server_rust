@@ -1,28 +1,19 @@
-use std::collections::HashMap;
 /*
- * generic wrapper file for interacting with xml files
- * 
+ * generic wrapper file for interacting with xml files\
  */
 use std::io::{BufRead};
 use std::ops::Deref;
 use std::path::Path;
-// use std::collections::HashMap;
 use std::str;
+use std::collections::HashMap;
 
 use quick_xml::Error as XmlError;
 use quick_xml::events::{Event, BytesStart};
-// use quick_xml::events::{attributes};
 use quick_xml::reader::Reader;
 
-/* Basic sep_xml search and retrieve api.
- * This could probably be done far more succinctly and clearly, but 
- * I am not fluent enough with iterators and closures yet to do a 
- * neater implementation.
- */
-
-// return true if the empty tag or start tag passed in has name="name"
-// ignores all other types of events apart from Start and Empty tags
-//  as sep_wadl doesn't contain them and text doesn't have an id/name
+/// return true if the empty element or start element passed in has name="name"
+/// ignores all other types of events apart from Start and Empty elements
+///  as sep_wadl doesn't contain them and text doesn't have an id/name
 fn event_has_name(event_content: &BytesStart, name: &str) -> bool {
     event_content.name().into_inner().cmp(name.as_bytes()).is_eq()
 }
@@ -40,7 +31,7 @@ fn contains_att_value(event: &BytesStart, key: &str, value: &str) -> Result<bool
     Ok(false)
 }
 
-fn contains_att(event: &BytesStart, att_name: &str) -> Result<bool, XmlError>{
+pub fn contains_att(event: &BytesStart, att_name: &str) -> Result<bool, XmlError>{
     let mut event_atts = event.attributes();
     while let Some(Ok(att)) = event_atts.next(){
         println!("{:?}", att);
@@ -52,7 +43,7 @@ fn contains_att(event: &BytesStart, att_name: &str) -> Result<bool, XmlError>{
     Ok(false)
 }
 
-pub fn xml_tag_exists<P: AsRef<Path>>(file_path: P, name: &str, att_key: &str, att_value: &str) -> bool{
+pub fn xml_element_exists<P: AsRef<Path>>(file_path: P, name: &str, att_key: &str, att_value: &str) -> bool{
     let mut reader = if let Ok(reader) = Reader::from_file(file_path){
         reader
     } else {return false};
@@ -73,27 +64,20 @@ pub fn xml_tag_exists<P: AsRef<Path>>(file_path: P, name: &str, att_key: &str, a
             Event::Eof => {
                 break false;
             },
-            // not bothering with all other types of xml tags
+            // not bothering with all other types of xml elements
             _ => continue,
         }
     }
 }
 
-/* 
- * fn seek_till<'a, R: BufRead, T: AsRef<Path>>(name: &'a str, file_path: &'a T) -> Result<(Reader<BufReader<File>>, Vec<u8>, Event<'a>), Error>;
- * finds first occurence of of either Start or Empty tag with name="name"
- * returns Reader at that position, else Err - which would be a useful function
- * and after trying to figure this out for way too long, I am officially 
- * out of patience and am not not bothering with lifetimes, event returning,
- * function definitions or any of that stuff. I am writing this the dumb
- * block of code spaghetti way and that's that. If you can figure this
- * out please do so and I will be more than happy to see how someone
- * not a newbie solves this problem
+/** 
+ * Finds first occurence of of either Start or Empty element with name="name"
+ * returns Reader at that position, else throws XmlError
  */ 
 fn seek_till<'a, R: BufRead>(reader: &mut Reader<R>, name: &str, att_key: Option<&str>, att_value: Option<&str>) -> Result<Event<'static>, XmlError>{
     let mut buf = Vec::new();
     
-    // locate the tag in question
+    // locate the element in question
     loop{
         let event = reader.read_event_into(&mut buf)?;
         match event {
@@ -128,14 +112,14 @@ fn seek_till<'a, R: BufRead>(reader: &mut Reader<R>, name: &str, att_key: Option
     };
 }
 
-/// returns a hashmap of attributes in the first tag with "name" and optionally att_key="att_value"
-/// hashmap is empty if no attributes are found.
-pub fn get_tag_attributes<P: AsRef<Path>>(file_path: P, name: &str, att_key: Option<&str>, att_value: Option<&str>) -> Result<HashMap<String, String>, XmlError>{
+/// returns a `HashMap<String, String>` of attributes in the first element with `name` 
+/// and optionally `att_key="att_value"`. An empty HashMap is returned if no attributes are found.
+pub fn get_element_attributes<P: AsRef<Path>>(file_path: P, name: &str, att_key: Option<&str>, att_value: Option<&str>) -> Result<HashMap<String, String>, XmlError>{
     let mut reader = Reader::from_file(file_path)?;
     reader.trim_text(true);
-    let found_tag = seek_till(&mut reader, name, att_key, att_value)?.into_owned();
-    // println!("get_tag_bytes output: {found_tag:?}");
-    let output_map = match found_tag {
+    let found_element = seek_till(&mut reader, name, att_key, att_value)?.into_owned();
+    // println!("get_element_bytes output: {found_element:?}");
+    let output_map = match found_element {
         Event::Start(a) => get_hashmap_from_bytes(a),
         Event::Empty(a) => get_hashmap_from_bytes(a),
         _ => return Err(XmlError::TextNotFound),
@@ -144,7 +128,7 @@ pub fn get_tag_attributes<P: AsRef<Path>>(file_path: P, name: &str, att_key: Opt
     return Ok(output_map);
 }
 
-// returns a hashmap with the attributes of a Start or Empty tag
+/// returns a hashmap with the attributes of a Start or Empty element
 fn get_hashmap_from_bytes(bytes: BytesStart) -> HashMap<String, String>{
     let mut output = HashMap::new();
     for att in bytes.into_owned().attributes(){
@@ -159,17 +143,11 @@ fn get_hashmap_from_bytes(bytes: BytesStart) -> HashMap<String, String>{
     }
     return output;
 }
-// Other potential exercises in coupling include: 
-    // after reading in the "resource" event, read in  the <doc> and </doc>
-    // by calling .read_event_into 2 times to get to the method tag
-    // we can make this assumption because the sep_wadl.xml
-    // file we are using and coupling to this code has only
-    // this format. However, this does very tightly couple the two
 
-/// Input: file name, name of the tag, an attribute key-value pair
-/// returns: byte array with the content that appears after the '>' 
-/// of the tag found, trimmed of leading and trailing whitespace, each
-/// tag ending in a newline '\n' character
+/// Takes in a file name, name of the element, an attribute key-value pair
+/// and returns a byte array with the content that appears after the `>`
+///  of the element found, trimmed of leading and trailing whitespace, each
+/// element ending in a newline `'\n'` character
 pub fn get_first_content<P: AsRef<Path>>(file_path: P, name: &str, att_key: Option<&str>, att_value: Option<&str>) -> Result<Vec<u8>, XmlError>{
     let mut reader = Reader::from_file(file_path)?;
     reader.trim_text(true);
@@ -205,7 +183,7 @@ pub fn get_first_content<P: AsRef<Path>>(file_path: P, name: &str, att_key: Opti
                         }
                     },
                     Event::Eof => return Err(XmlError::UnexpectedEof(
-                        "reach end of file without finding closing tag".to_owned()
+                        "reach end of file without finding closing element".to_owned()
                     )),
                     _ => {
                         output.append(&mut event
@@ -224,12 +202,12 @@ pub fn get_first_content<P: AsRef<Path>>(file_path: P, name: &str, att_key: Opti
     Ok(output)
 }
 
-/// retrieves first instance of a Start or Empty tag with "name" and Some("att_key")=Some("att_value")
-/// if att_key and/or att_value are None, ignores tag attributes.
-/// returns the found tag
-pub fn get_tag_bytes<P: AsRef<Path>>(file_path: P, name: &str, att_key: Option<&str>, att_value: Option<&str>) -> Result<Vec<u8>, XmlError>{
+/// retrieves first instance of a Start or Empty element with `name` and `Some("att_key")=Some("att_value")`
+/// if `att_key` and/or `att_value` are `None`, ignores element attributes.
+/// returns the found element
+pub fn get_element_bytes<P: AsRef<Path>>(file_path: P, name: &str, att_key: Option<&str>, att_value: Option<&str>) -> Result<Vec<u8>, XmlError>{
     let mut reader = Reader::from_file(file_path)?;
     reader.trim_text(true);
-    let found_tag = seek_till(&mut reader, name, att_key, att_value)?;
-    return Ok(found_tag.deref().to_vec());
+    let found_element = seek_till(&mut reader, name, att_key, att_value)?;
+    return Ok(found_element.deref().to_vec());
 }

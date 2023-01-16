@@ -45,7 +45,7 @@ struct SignedRealEnergy {
 
 // for this and all the other tuple structs, the new() method should be used
 // If only there was a way to enforce it as the only form of construction
-// TODO: (optional) find way to enforce new() method for construction
+// Optional Optimisation find way to enforce new() method for construction
 #[derive(Debug)]
 struct OneHourRangeType(Int16);
 
@@ -143,7 +143,7 @@ impl fmt::Display for PowerOfTenMultiplierType {
  */
 // this implementation isn't particularly flexible. Luckily, this is extra and not 
 // particularly requried. 
-// TODO: (optional) make this better if you can.
+// Optional Optimisation make this better if you can.
 #[derive(Debug)]
 #[repr(UInt8)]
 enum PrimacyType {

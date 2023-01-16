@@ -4,7 +4,9 @@
  *  Resource trait and traits that extend it (e.g. List, IdentifiedObject)
  * 
  */
-// Attribute data
+/// Attribute data
+/// defined as a struct to allow for storage format flexibility in the 
+/// future.
 #[derive(Default)]
 struct AnyURI {
     path: &str,
@@ -28,11 +30,11 @@ trait Resource {
 }
 
 trait ListTrait {
-    // TODO: ListTrait
+    todo!("define List trait functions");
 }
 
 trait LinkTrait {
-    // TODO: LinkTrait
+    todo!("define Link trait functions");
 }
 
 trait Respondable {
@@ -41,17 +43,23 @@ trait Respondable {
 }
 
 trait Subscribable {
-    // TODO: Subscribable
+    todo!("define Subscribable trait functions");
 }
 
 trait Identified {
-    // TODO: Identified
+    todo!("define Identified trait functions");
 }
 
 // Data Containers
 #[derive(Default)]
 struct ResourceData {
     pub href: AnyURI,
+}
+
+impl ResourceData {
+    fn new(href: AnyURI) -> ResourceData{
+        ResourceData{ href }
+    }
 }
 
 #[derive(Default)]
@@ -91,7 +99,7 @@ struct List {
 }
 
 // impl ListTrait and LinkTrait
-// TODO: (optional) could delve into macros and implement "derive(Link, List, Resource)"
+// Optional optimisation: could delve into macros and implement "derive(Link, List, Resource)"
 // by using the fact that these objects all have an instance of something 
 // that implements these traits (LinkData, ListData, ResourceData)
 // would make this whole implementaiton process a lot faster and less verbose.
