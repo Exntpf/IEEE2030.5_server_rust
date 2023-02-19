@@ -6,6 +6,9 @@ These files relate to resources under section B.2.3 of the official 2030.5 speci
 
 Defines traits and structs described generally in section 8.2 and in detail in section B.2.3.2. specifically, describes the Resource trait and traits that extend it (e.g. List, IdentifiedObject)
 
+For List objects, all is the total number of entries, and result is the number of results returned to the client.
+Link objects simply return the URI (as a String) of the Resource they link to. ListLink's return the URI's of List Resources.
+
 ## Objects
 
 Described mainly in section 10.2.3 detail in section B.2.3.3. Specifically, it contains the traits and objects for Events and related types that extend it (e.g. RandomizableEvent)

@@ -15,7 +15,9 @@
 
 // Traits
 trait Resource {
-    pub fn get_href(&self) -> Option<String>;
+    pub fn get_href(&self) -> Option<String>{
+        None;
+    }
 }
 
 trait List {
@@ -24,7 +26,9 @@ trait List {
 }
 
 trait LinkTrait {
-    todo!("define Link trait functions");
+    pub fn get_href(&self) -> String{
+        None;
+    }
 }
 
 trait Respondable {
@@ -47,9 +51,11 @@ struct ResourceObj {
 }
 
 impl ResourceObj {
+    /// input's that do not start with '/' or are >255 characters
+    /// are ignored and href value will be None.
     fn new(href: Option<String>) -> ResourceObj{
-        if let Some(ref inner) = href{
-            if !inner.starts_with("/") || inner.len() > 255{ 
+        if let Some(ref href) = href{
+            if !href.starts_with("/") || href.len() > 255{ 
                 return ResourceObj{href: None} 
             }
         }
@@ -66,6 +72,7 @@ impl Resource for ResourceObj {
     }
 }
 
+/// List fields as per IEEE 2030.5 specification.
 #[derive(Default, Serialize, Deserialize)]
 struct ListData<T: Resource>{
     all: u32,
@@ -77,6 +84,7 @@ impl<T: Resource> ListData<T>{
     fn new() -> ListData<T>{
         ListData{ all: 0, result: 0, items: Vec::<T>::new() }
     }
+
     /// adds item onto end of ListData collection of `T`
     /// if `all` is greater than `result`, it's value is not affected.
     fn push(&mut self, item: T){
@@ -152,7 +160,7 @@ impl<T: Resource> ListData<T>{
     }
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Resource, Default, Serialize, Deserialize)]
 struct ListObj<T: Resource> {
     super_class: ResourceObj,
     list_data: ListData<T>,
@@ -169,7 +177,7 @@ impl<T: Resource> ListObj<T>{
 
 // «XSDattribute»
 #[derive(Default, Serialize, Deserialize)]
-struct LinkData {
+struct LinkObj {
     href: String,
 }
 
@@ -191,47 +199,50 @@ struct IdentifiedData {
     version: VersionType,
 }
 
-// impl ListTrait and LinkTrait
-// Optional optimisation: could delve into macros and implement "derive(Link, List, Resource)"
-// by using the fact that these objects all have an instance of something 
-// that implements these traits (LinkData, ListObj, ResourceObj)
-// would make this whole implementaiton process a lot faster and less verbose.
+#[derive(Link)]
 struct ListLink {
-    link_data: LinkData,
-    list_data: ListObj,
+    super_class: LinkObj,
+    all: Option<UInt32>,
 }
 
+#[derive(Resource, Default, Debug, Serialize, Deserialize)]
 struct RespondableResource {
     super_class: ResourceObj,
     respondable_data: RespondableData,
 }
 
+#[derive(Resource, Default, Debug, Serialize, Deserialize)]
 struct SubscribableResource {
     super_class: ResourceObj,
     subscribable_data: SubscribableData,
 }
 
+#[derive(Resource, Default, Debug, Serialize, Deserialize)]
 struct IdentifiedObject {
     super_class: ResourceObj,
     identified_data: IdentifiedData,
 }
 
+#[derive(Resource, Default, Debug, Serialize, Deserialize)]
 struct SubscribableIdentifiedObject {
     super_class: SubscribableResource,
     identified_data: IdentifiedData,
 }
 
+#[derive(Resource, Default, Debug, Serialize, Deserialize)]
 struct SubscribableList {
     super_class: SubscribableResource,
     list_data: ListData,
 }
 
+#[derive(Resource, Default, Debug, Serialize, Deserialize)]
 struct RespondableSubscribableIdentifiedObject {
     super_class: RespondableResource,
     subscribable_data: SubscribableData,
     identified_data: IdentifiedData,
 }
 
+#[derive(Resource, Default, Debug, Serialize, Deserialize)]
 struct RespondableIdentifiedObject {
     super_class: RespondableResource,
     identified_data: IdentifiedData,    

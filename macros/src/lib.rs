@@ -68,7 +68,7 @@ fn impl_resource_macro(ast: &syn::DeriveInput) -> TokenStream {
                 }
                 panic!("Could not find \"super_class\" field that implements the Resource trait in struct {}", name.to_string());
             },
-            /// resort to default implementation if a Unit struct or Tuple struct
+            // resort to default implementation if a Unit struct or Tuple struct
             _ => {
                 let gen = quote! {
                     impl Resource for #name {}
@@ -83,18 +83,18 @@ fn impl_resource_macro(ast: &syn::DeriveInput) -> TokenStream {
     }
 }
 
-/*
-#[proc_macro_derive(List)]
-pub fn list_macro_derive(input: TokenStream) -> TokenStream {
+
+#[proc_macro_derive(Link)]
+pub fn link_macro_derive(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let ast = syn::parse(input).unwrap();
 
     // Build the trait implementation
-    impl_list_macro(&ast)
+    impl_link_macro(&ast)
 }
 
-fn impl_list_macro(ast: &syn::DeriveInput) -> TokenStream {
+fn impl_link_macro(ast: &syn::DeriveInput) -> TokenStream {
     let field_search_list = [
         "super_class",
         "superclass",
@@ -120,7 +120,7 @@ fn impl_list_macro(ast: &syn::DeriveInput) -> TokenStream {
 
                     // Code the macro generates if "super_class" field exists
                     let gen = quote! {
-                        impl Resource for #name {
+                        impl Link for #name {
                             fn get_href(&self) -> String {
                                 self.#field_ident.get_href()
                             }
@@ -130,7 +130,7 @@ fn impl_list_macro(ast: &syn::DeriveInput) -> TokenStream {
                 }
                 panic!("Could not find \"super_class\" field that implements the Resource trait in struct {}", name.to_string());
             },
-            /// resort to default implementation if a Unit struct or Tuple struct
+            // resort to default implementation if a Unit struct or Tuple struct
             _ => {
                 let gen = quote! {
                     impl Resource for #name {}
@@ -144,4 +144,3 @@ fn impl_list_macro(ast: &syn::DeriveInput) -> TokenStream {
         Currently, only Structs with named fields can be derived with this macro");
     }
 }
-*/

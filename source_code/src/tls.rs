@@ -65,10 +65,15 @@ pub fn set_cert(mut config: Config, private_key_path: &str, cert_path: &str) -> 
 
 pub fn establish_tls_server(tcp_stream: TcpStream, private_key_path: &str, cert_path: &str) -> Context{
     let config = tls_setup();
+    
+    println!("Server: Setting up TLS ciphers");
     let config = set_2030_ciphers(config);
-    let config = set_cert(config, private_key_path, cert_path); // change this to return Result at a later stage.
 
+    println!("Server: Loading server certificate and private key");
+    let config = set_cert(config, private_key_path, cert_path); // change this to return Result at a later stage.
     let mut ctx = Context::new(Arc::new(config));
+
+    println!("Server: Establishing ctx with client");
     if let Err(a) = ctx.establish(tcp_stream, None) {
         panic_err(false, a, "could not \"establish\" tls client");
     }

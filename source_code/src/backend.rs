@@ -16,10 +16,15 @@
  * encoded.
  */
 
-todo!("fs client response xml validation and utf8 encoding checking");
+pub fn service_response(path: &str, method: &str, body: Option<&str>) -> Vec<u8>{
 
-todo!("decide if converting path `/1/` -> wadl `/{id1}/` is the task\
-    of backend.rs or wadl.rs");
+    return vec![0];
+}
+// todo!("fs client response xml validation and utf8 encoding checking");
+
+// todo!("decide if converting path `/1/` -> wadl `/{id1}/` is the task\
+//     of backend.rs or wadl.rs");
+
 
 
  /*

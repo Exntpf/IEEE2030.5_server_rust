@@ -3,6 +3,7 @@
  * Specifically, it contains  type for = aliases 
  * primitive, concrete data types
  *  (e.g. Int64 is the type i64 in rust)
+ * All types can be serialised and deserialised using the serde crate
  */
 use arrayvec::ArrayString;
 use num_bigint::BigUint;
