@@ -4,41 +4,43 @@
 * data types used for various function sets 
 * (e.g. TimeType is a 64-bit integer or "Int64")
 */
-use primitives;
+use super::primitives::*;
+use core::fmt;
 use std::io::{Error, ErrorKind};
 use bitflags::bitflags;
+use serde::{Serialize, Deserialize};
 
 // Nice to do's:
 /*
  * DstRuleType p166
  * GPSLocationType.lat and GPSLocationType.lon constructer that does error checking p167
  */
-type DstRuleType = HexBinary32;
+pub type DstRuleType = HexBinary32;
 
-type LocaleType = String42;
-type mRIDType = HexBinary128;
-type PENType = UInt32;
-type SFDIType = UInt40;
-type TimeOffsetType = Int32;
-type TimeType = Int64;
-type VersionType = UInt16;
+pub type LocaleType = String42;
+pub type mRIDType = HexBinary128;
+pub type PENType = UInt32;
+pub type SFDIType = UInt40;
+pub type TimeOffsetType = Int32;
+pub type TimeType = Int64;
+pub type VersionType = UInt16;
 
-struct DateTimeInterval {
+pub struct DateTimeInterval {
     duration: UInt16,
     start: TimeType,
 }
 
-struct GPSLocationType {
+pub struct GPSLocationType {
     lat: String32,
     lon: String32,
 }
 
-struct RealEnergy {
+pub struct RealEnergy {
     multiplier: PowerOfTenMultiplierType,
     value: UInt48,
 }
 
-struct SignedRealEnergy {
+pub struct SignedRealEnergy {
     multiplier: PowerOfTenMultiplierType,
     value: Int48,
 }
@@ -47,7 +49,7 @@ struct SignedRealEnergy {
 // If only there was a way to enforce it as the only form of construction
 // Optional Optimisation find way to enforce new() method for construction
 #[derive(Debug)]
-struct OneHourRangeType(Int16);
+pub struct OneHourRangeType(Int16);
 
 impl OneHourRangeType {
     fn new(value: Int16)->Result<OneHourRangeType, Error>{
@@ -65,7 +67,7 @@ impl fmt::Display for OneHourRangeType {
 
 // measured in 1/100ths of a percent (eg. PerCent(102) is 1.02%)
 #[derive(Debug)]
-struct PerCent(UInt16);
+pub struct PerCent(UInt16);
 
 impl PerCent {
     fn new(value: UInt16)->Result<PerCent, Error>{
@@ -82,7 +84,7 @@ impl fmt::Display for PerCent {
 }
 
 #[derive(Debug)]
-struct SignedPerCent(Int16);
+pub struct SignedPerCent(Int16);
 
 impl SignedPerCent {
     fn new(value: Int16)->Result<SignedPerCent, Error>{
@@ -99,7 +101,7 @@ impl fmt::Display for SignedPerCent {
 }
 
 #[derive(Debug)]
-struct PINType(UInt32);
+pub struct PINType(UInt32);
 
 impl PINType {
     fn new(value: UInt32)->Result<PINType, Error>{
@@ -116,7 +118,7 @@ impl fmt::Display for PINType {
 }
 
 #[derive(Debug, Default)]
-struct PowerOfTenMultiplierType(Int8);
+pub struct PowerOfTenMultiplierType(Int8);
 
 impl PowerOfTenMultiplierType {
     fn new(value: Int8)->Result<PowerOfTenMultiplierType, Error>{
@@ -145,11 +147,11 @@ impl fmt::Display for PowerOfTenMultiplierType {
 // particularly requried. 
 // Optional Optimisation make this better if you can.
 #[derive(Debug)]
-#[repr(UInt8)]
-enum PrimacyType {
-    HEMS = 0,
-    CPSP = 1,
-    NCSP = 2,
+#[repr(u8)]
+pub enum PrimacyType {
+    HEMS,
+    CPSP,
+    NCSP,
     User(u8),
 }
  
@@ -195,14 +197,14 @@ impl PrimacyType {
 }
 
 
-struct UnitValueType {
+pub struct UnitValueType {
     multiplier: PowerOfTenMultiplierType,
     unit: UomType,
     value: Int48,
 }
 
-#[repr(UInt8)]
-enum AccumulationBehaviourType {
+#[repr(u8)]
+pub enum AccumulationBehaviourType {
     NotApplicable = 0,
     Cumulative = 3,
     DeltaData = 4,
@@ -216,14 +218,14 @@ impl Default for AccumulationBehaviourType {
 }
 
 // p162
-#[repr(UInt8)]
-enum ApplianceLoadReductionType{
+#[repr(u8)]
+pub enum ApplianceLoadReductionType{
     DelayApplianceLoad = 0,
     TemporaryApplianceLoadReduction = 1,
 }
 
-#[repr(UInt8)]
-enum CommodityType {
+#[repr(u8)]
+pub enum CommodityType {
     NotApplicable = 0,
     ElectricitySecondaryMetered = 1,
     ElectricityPrimaryMetered = 2,
@@ -242,8 +244,8 @@ impl Default for CommodityType {
 }
 
 
-#[repr(UInt8)]
-enum ConsumptionBlockType {
+#[repr(u8)]
+pub enum ConsumptionBlockType {
     NotApplicable = 0,
     Block1 = 1,
     Block2 = 2,
@@ -268,8 +270,8 @@ impl Default for ConsumptionBlockType {
 }
 
 // p164
-#[repr(UInt8)]
-enum CurrencyCode{
+#[repr(u8)]
+pub enum CurrencyCode{
     NotApplicable = 0,
     TemporaryApplianceLoadReduction = 1,
 }
@@ -279,8 +281,8 @@ impl Default for CurrencyCode {
 }
 
 
-#[repr(UInt8)]
-enum DataQualifierType {
+#[repr(u8)]
+pub enum DataQualifierType {
     NotApplicable = 0,
     Average = 2,
     Maximum = 8,
@@ -295,8 +297,8 @@ impl Default for DataQualifierType {
 }
 
 
-#[repr(UInt8)]
-enum FlowDirectionType {
+#[repr(u8)]
+pub enum FlowDirectionType {
     NotApplicable = 0,
     Forward = 1,
     Reverse = 19,
@@ -307,8 +309,8 @@ impl Default for FlowDirectionType {
 }
 
 
-#[repr(UInt8)]
-enum KindType {
+#[repr(u8)]
+pub enum KindType {
     NotApplicable = 0,
     Currency = 3,
     Demand = 8,
@@ -321,8 +323,8 @@ impl Default for KindType {
 }
 
 
-#[repr(UInt8)]
-enum PhaseCode {
+#[repr(u8)]
+pub enum PhaseCode {
     NotApplicable = 0,
     PhaseC = 32, // and S2
     PhaseCN = 33, // and S2N
@@ -340,9 +342,8 @@ impl Default for PhaseCode {
     fn default() -> Self { PhaseCode::NotApplicable }
 }
 
-
-#[repr(UInt8)]
-enum ServiceKind {
+#[repr(u8)]
+pub enum ServiceKind {
     Electricity = 0,
     Gas = 1,
     Water = 2,
@@ -353,17 +354,18 @@ enum ServiceKind {
 }
 
 // «XSDsimpleType»
-#[repr(UInt8)]
-enum SubscribableType {
+#[derive(Debug, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum SubscribableType {
     NoSubscriptionsSupported = 0,
     NonConditionalSubscriptions = 1,
     ConditionalSubscriptions = 2,
     AllSubscriptions = 3,
 }
 
-
-#[repr(UInt8)]
-enum TOUType {
+#[derive(Debug, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum TOUType {
     NotApplicable = 0,
     TouA = 1,
     TouB = 2,
@@ -386,9 +388,9 @@ impl Default for TOUType {
     fn default() -> Self { TOUType::NotApplicable }
 }
 
-
-#[repr(UInt8)]
-enum  UnitType {
+#[derive(Debug, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum  UnitType {
     kWh = 0,
     kW = 1,
     Watts = 2,
@@ -404,9 +406,9 @@ enum  UnitType {
     Unitless = 12,
 }
 
-
-#[repr(UInt8)]
-enum UomType {
+#[derive(Debug, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum UomType {
     NotApplicable = 0,
     Amperes = 5,
     Kelvin = 6,
@@ -445,21 +447,21 @@ impl Default for UomType {
     fn default() -> Self { UomType::NotApplicable }
 }
 
-
 bitflags! {
-    struct RoleFlagsType: HexBinary16 {
-        IsMirror = 1;
-        IsPremiseAggregationPoint = 2;
-        IsPEV = 4;
-        IsDER = 8;
-        IsRevenueQuality = 16;
-        IsDC = 32;
-        IsSubmeter = 64;
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    pub struct RoleFlagsType: UInt16 {
+        const IsMirror = 1;
+        const IsPremiseAggregationPoint = 2;
+        const IsPEV = 4;
+        const IsDER = 8;
+        const IsRevenueQuality = 16;
+        const IsDC = 32;
+        const IsSubmeter = 64;
     }
 }
 
 bitflags! {
-    struct DeviceCategoryType{
+    pub struct DeviceCategoryType: UInt32 {
         const ProgrammableCommunicatingThermostat = 1;
         const StripHeaters = 2;
         const BaseboardHeaters = 4;
@@ -487,19 +489,7 @@ bitflags! {
 }
 
 bitflags! {
-    struct RoleFlagsType{
-        const IsMirror = 1;
-        const IsPremiseAggregationPoint = 2;
-        const IsPEV = 4;
-        const IsDER = 8;
-        const IsRevenueQuality = 16;
-        const IsDC = 32;
-        const IsSubmeter = 64;
-    }    
-}
-
-bitflags! {
-    struct DERControlType{
+    pub struct DERControlType: UInt32 {
         const ChargeMode = 1;
         const DischargeMode = 2;
         const OpModConnect = 4;

@@ -132,10 +132,7 @@ fn impl_link_macro(ast: &syn::DeriveInput) -> TokenStream {
             },
             // resort to default implementation if a Unit struct or Tuple struct
             _ => {
-                let gen = quote! {
-                    impl Resource for #name {}
-                };
-                return gen.into();
+                panic!("No default implementation for Link Trait");
             },
         }
     } else {

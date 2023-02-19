@@ -1,8 +1,10 @@
 use std::fs;
+use std::str;
 use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
 
+use crate::backend;
 use crate::tcp::*;
 use crate::tls::*;
 use crate::errs::*;
@@ -68,29 +70,101 @@ fn server_handle_connection(stream: TcpStream){
 
     let full_request = String::from_utf8_lossy(&server_buf);
     println!("Server recieved request ->\n{}", full_request);
-    
-    let http_request_line = full_request
-                                    .lines()
-                                    .next()
-                                    .unwrap();
-    let (status_line, http_file) = match http_request_line {
-        "GET /dcap HTTP/1.1" => {
-            ("HTTP/1.1 200 OK", "../hello.html")
-        },
-        _ => ("HTTP/1.1 404 NOT FOUND", "../404.html"),
-    };
-    println!("returned status line -> {}", status_line);
-    
-    let content = fs::read_to_string(http_file).unwrap(); // this might return Err if file not found.
 
-    // for the server, could use the error here as a way to check if the file/resource exists
-    // but it still feels better to have a whitelist of the services offered by the server, compare 
-    // the request against that,
-    // and then have a function encapsulate the getting of the resource from the file.
-    let content_length = content.len();
-    let response = format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_length}\r\n\r\n{content}");
-    // let response = format!("{content}");
+    let http_header_line = full_request
+                                .lines()
+                                .next()
+                                .unwrap();
+    let mut http_header_words = http_header_line.split_whitespace();
+    let method = http_header_words
+                .next()
+                .expect("Client request was malformed");
+    let path = http_header_words
+                .next()
+                .expect("Client request was malformed");
+    println!("path: {path}, method: {method}");
     
+    let (status_code, content) = match method{
+        "GET" => {
+            println!("server: input get_request received.");
+            backend::service_response(path, method, None)
+        },
+        "PUT" =>{
+            let mut http_request_lines = full_request.lines();
+            http_request_lines.position(|l| l.is_empty());
+            let mut body = String::new();
+            for line in http_request_lines{
+                body.push_str(line);
+                body.push('\n');
+            }
+            backend::service_response(path, method, Some(&body))
+        },
+        "POST" =>{
+            println!("input post_request received.");
+            let mut http_request_lines = full_request.lines();
+            http_request_lines.position(|l| l.is_empty());
+            let mut body = String::new();
+            for line in http_request_lines{
+                body.push_str(line);
+                body.push('\n');
+            }
+            backend::service_response(path, method, Some(&body))
+        },
+        "DELETE" =>{
+            // following RFC 9110 (June 2022), a client should not put
+            // anything in the body of DELETE request, so we are going 
+            // enforce this by ignoring the body.
+            backend::service_response(path, method, None)
+        },
+        _ => { panic!("Client method had no chill (was not RESTful)") },
+    };
+
+    let content = str::from_utf8(&content);
+    let mut response: String;
+    if let Err(_) = content{
+        response = "HTTP/1.1 500 Internal Server Error".to_owned();
+    }
+    
+    // easy refactor here is turning status_code into an enum of valid
+    // status codes.
+    let response = match status_code{
+        200 => {
+            let status_line = "HTTP/1.1 200 OK";
+            let content = content.unwrap();
+            let content_len = content.len();
+            format!("{status_line}\r\nContent-Type: application/sep+xml\r\nContent-Length: {content_len}\r\n\r\n{content}")
+        },
+        201 => {
+            let status_line = "HTTP/1.1 201 Created";
+            let content = content.unwrap();
+            format!("{status_line}\r\n{content}")
+        },
+        400 => {
+            let status_line = "HTTP/1.1 400 Bad Request";
+            format!("{status_line}")
+        },
+        401 => {
+            let status_line = "HTTP/1.1 401 Unauthorized";
+            format!("{status_line}")
+        },
+        404 => {
+            let status_line = "HTTP/1.1 404 Not Found";
+            format!("{status_line}")
+        },
+        405 => {
+            let status_line = "HTTP/1.1 405 Method Not Allowed";
+            format!("{status_line}")
+        },
+        500 => {
+            let status_line = "HTTP/1.1 500 Internal Server Error";
+            format!("{status_line}")
+        }
+        _ => {
+            let status_line = "HTTP/1.1 500 Internal Server Error";
+            format!("{status_line}")
+        }
+    };
+
     match ctx.write_all(response.as_bytes()){
         Ok(_) => println!("server: response sent to client."),
         Err(a) => print_err(false, a, "Response not sent to client"),

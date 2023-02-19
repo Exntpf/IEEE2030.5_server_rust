@@ -7,28 +7,24 @@
  */
 use arrayvec::ArrayString;
 use num_bigint::BigUint;
-use serde::{Serialize, Deserialize};
+use serde::de::{Visitor, self};
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
+use core::fmt;
 use std::io::ErrorKind;
-use std::error::Error;
 
 
 pub type Int8 = i8;
-pub type SE_Int8 = i8;
-pub type UInt8 = UInt8;
-pub type UInt8 = UInt8;
-pub type HexBinary8 = UInt8;
+pub type UInt8 = u8;
 pub type Int16 = i16;
-pub type UInt16 = UInt16;
+pub type UInt16 = u16;
 pub type Int32 = i32;
-pub type Int32 = i32;
-pub type UInt32 = UInt32;
-pub type UInt32 = UInt32;
+pub type UInt32 = u32;
 pub type Int48 = i64;
 pub type Int64 = i64;
-pub type UInt48 = UInt64;
-pub type UInt48 = UInt64;
-pub type UInt64 = UInt64;
+pub type UInt48 = u64;
+pub type UInt64 = u64;
 pub type UInt40 = UInt64;
+pub type UInt128 = u128;
 
 // HexBinary8
 // Spec says:
@@ -41,7 +37,7 @@ pub type UInt40 = UInt64;
 // is neither required nor particuarly important to the functioning of the protocol, so this
 // implementation simply prints the full length of the HexBinary in hexacimal, padded with '0'
 // Implementing the neater version (eg. 0x123 -> 0x0123) is left as a future optimisation
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
+#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
 pub struct HexBinary8(UInt8);
 
 impl AsRef<UInt8> for HexBinary8 {
@@ -58,7 +54,7 @@ impl fmt::Display for HexBinary8 {
 }
 
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
+#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
 pub struct HexBinary16(UInt16);
 
 impl AsRef<UInt16> for HexBinary16 {
@@ -75,7 +71,7 @@ impl fmt::Display for HexBinary16 {
 }
 
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
+#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
 pub struct HexBinary32(UInt32);
 
 impl AsRef<UInt32> for HexBinary32 {
@@ -92,7 +88,7 @@ impl fmt::Display for HexBinary32 {
 }
 
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
+#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
 pub struct HexBinary48(UInt64);
 
 impl AsRef<UInt64> for HexBinary48 {
@@ -109,7 +105,7 @@ impl fmt::Display for HexBinary48 {
 }
 
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
+#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
 pub struct HexBinary64(UInt64);
 
 impl AsRef<UInt64> for HexBinary64 {
@@ -126,7 +122,7 @@ impl fmt::Display for HexBinary64 {
 }
 
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
+#[derive(Serialize, Deserialize, Default, Debug, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
 pub struct HexBinary128(UInt128);
 
 impl AsRef<UInt128> for HexBinary128 {
@@ -142,13 +138,12 @@ impl fmt::Display for HexBinary128 {
     }
 }
 
-
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
+#[derive(Default, Clone, PartialEq, PartialOrd, Hash, Eq, Ord)]
 pub struct HexBinary160(BigUint);
 
 impl HexBinary160 {
-    fn new(num: Vec<UInt8>)->Result<HexBinary160, Error>{ // Error checking
-        if num.len() > 20 { Err(Error::from(ErrorKind::InvalidInput)) }
+    fn new(num: Vec<UInt8>)->Result<HexBinary160, ErrorKind>{ // Error checking
+        if num.len() > 20 { Err(ErrorKind::InvalidInput) }
         else { Ok( HexBinary160( BigUint::from_bytes_be( &num ))) }
     }
 }
@@ -178,8 +173,8 @@ impl fmt::Display for HexBinary160 {
 
 
 
-#[derive(Debug)]
-struct String6(ArrayString<6>);
+#[derive(Debug, Default)]
+pub struct String6(ArrayString<6>);
 impl String6{
     const MAX_LEN:usize = 6;
     // would like to use generic errors here, but that will be done during the 
@@ -246,8 +241,8 @@ impl<'de> Deserialize<'de> for String6 {
     }
 }
 
-
-struct String16(ArrayString<16>);
+#[derive(Debug, Default)]
+pub struct String16(ArrayString<16>);
 impl String16{
     const MAX_LEN: usize = 16;
 
@@ -255,12 +250,12 @@ impl String16{
         if input.len() > Self::MAX_LEN {
             Err(ErrorKind::InvalidInput)
         } else {
-            Ok(String6(ArrayString::from(input).unwrap()))
+            Ok(String16(ArrayString::from(input).unwrap()))
         }
     }
 }
 
-struct String166Visitor;
+struct String16Visitor;
 
 impl Serialize for String16{
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -269,7 +264,7 @@ impl Serialize for String16{
 }
 
 // can't make this generic as Value must be concrete. 
-impl<'de> Visitor<'de> for String166Visitor {
+impl<'de> Visitor<'de> for String16Visitor {
     type Value = String16;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -282,7 +277,7 @@ impl<'de> Visitor<'de> for String166Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
+            Ok(String16(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
         }
     }
     
@@ -295,25 +290,13 @@ impl<'de> Visitor<'de> for String166Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
+            Ok(String16(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
         }
     }
 }
 
-// In keeping with KISS, trying other tomfoolery to work around the innevitable 
-// boilerplate is not worth the trouble at this point.
-// We will need to get used to macro's and use them to derive all this stuff.
-impl<'de> Deserialize<'de> for String6 {
-    fn deserialize<D>(deserializer: D) -> Result<String6, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_string(String6Visitor)
-    }
-}
-
-
-struct String20(ArrayString<20>);
+#[derive(Debug, Default)]
+pub struct String20(ArrayString<20>);
 impl String20{
     const MAX_LEN: usize = 20;
 
@@ -321,12 +304,12 @@ impl String20{
         if input.len() > Self::MAX_LEN {
             Err(ErrorKind::InvalidInput)
         } else {
-            Ok(String6(ArrayString::from(input).unwrap()))
+            Ok(String20(ArrayString::from(input).unwrap()))
         }
     }
 }
 
-struct String206Visitor;
+struct String20Visitor;
 
 impl Serialize for String20{
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -335,7 +318,7 @@ impl Serialize for String20{
 }
 
 // can't make this generic as Value must be concrete. 
-impl<'de> Visitor<'de> for String206Visitor {
+impl<'de> Visitor<'de> for String20Visitor {
     type Value = String20;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -348,7 +331,7 @@ impl<'de> Visitor<'de> for String206Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
+            Ok(String20(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
         }
     }
     
@@ -361,25 +344,13 @@ impl<'de> Visitor<'de> for String206Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
+            Ok(String20(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
         }
     }
 }
 
-// In keeping with KISS, trying other tomfoolery to work around the innevitable 
-// boilerplate is not worth the trouble at this point.
-// We will need to get used to macro's and use them to derive all this stuff.
-impl<'de> Deserialize<'de> for String6 {
-    fn deserialize<D>(deserializer: D) -> Result<String6, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_string(String6Visitor)
-    }
-}
-
-
-struct String32(ArrayString<32>);
+#[derive(Debug, Default)]
+pub struct String32(ArrayString<32>);
 impl String32{
     const MAX_LEN: usize = 32;
 
@@ -387,12 +358,12 @@ impl String32{
         if input.len() > Self::MAX_LEN {
             Err(ErrorKind::InvalidInput)
         } else {
-            Ok(String6(ArrayString::from(input).unwrap()))
+            Ok(String32(ArrayString::from(input).unwrap()))
         }
     }
 }
 
-struct String326Visitor;
+struct String32Visitor;
 
 impl Serialize for String32{
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -401,7 +372,7 @@ impl Serialize for String32{
 }
 
 // can't make this generic as Value must be concrete. 
-impl<'de> Visitor<'de> for String326Visitor {
+impl<'de> Visitor<'de> for String32Visitor {
     type Value = String32;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -414,7 +385,7 @@ impl<'de> Visitor<'de> for String326Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
+            Ok(String32(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
         }
     }
     
@@ -427,25 +398,13 @@ impl<'de> Visitor<'de> for String326Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
+            Ok(String32(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
         }
     }
 }
 
-// In keeping with KISS, trying other tomfoolery to work around the innevitable 
-// boilerplate is not worth the trouble at this point.
-// We will need to get used to macro's and use them to derive all this stuff.
-impl<'de> Deserialize<'de> for String6 {
-    fn deserialize<D>(deserializer: D) -> Result<String6, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_string(String6Visitor)
-    }
-}
-
-
-struct String42(ArrayString<42>);
+#[derive(Debug, Default)]
+pub struct String42(ArrayString<42>);
 impl String42{
     const MAX_LEN: usize = 42;
 
@@ -453,12 +412,12 @@ impl String42{
         if input.len() > Self::MAX_LEN {
             Err(ErrorKind::InvalidInput)
         } else {
-            Ok(String6(ArrayString::from(input).unwrap()))
+            Ok(String42(ArrayString::from(input).unwrap()))
         }
     }
 }
 
-struct String426Visitor;
+struct String42Visitor;
 
 impl Serialize for String42{
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -467,7 +426,7 @@ impl Serialize for String42{
 }
 
 // can't make this generic as Value must be concrete. 
-impl<'de> Visitor<'de> for String426Visitor {
+impl<'de> Visitor<'de> for String42Visitor {
     type Value = String42;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -480,7 +439,7 @@ impl<'de> Visitor<'de> for String426Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
+            Ok(String42(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
         }
     }
     
@@ -493,25 +452,13 @@ impl<'de> Visitor<'de> for String426Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
+            Ok(String42(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
         }
     }
 }
 
-// In keeping with KISS, trying other tomfoolery to work around the innevitable 
-// boilerplate is not worth the trouble at this point.
-// We will need to get used to macro's and use them to derive all this stuff.
-impl<'de> Deserialize<'de> for String6 {
-    fn deserialize<D>(deserializer: D) -> Result<String6, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_string(String6Visitor)
-    }
-}
-
-
-struct String192(ArrayString<192>);
+#[derive(Debug, Default)]
+pub struct String192(ArrayString<192>);
 impl String192{
     const MAX_LEN: usize = 192;
 
@@ -519,7 +466,7 @@ impl String192{
         if input.len() > Self::MAX_LEN {
             Err(ErrorKind::InvalidInput)
         } else {
-            Ok(String6(ArrayString::from(input).unwrap()))
+            Ok(String192(ArrayString::from(input).unwrap()))
         }
     }
 }
@@ -546,7 +493,7 @@ impl<'de> Visitor<'de> for String192Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
+            Ok(String192(ArrayString::<{Self::Value::MAX_LEN}>::from(&v).unwrap()))
         }
     }
     
@@ -559,19 +506,7 @@ impl<'de> Visitor<'de> for String192Visitor {
         if v.len() > Self::Value::MAX_LEN {
             Err(E::invalid_length(Self::Value::MAX_LEN, &self))
         } else {
-            Ok(String6(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
+            Ok(String192(ArrayString::<{Self::Value::MAX_LEN}>::from(v).unwrap()))
         }
-    }
-}
-
-// In keeping with KISS, trying other tomfoolery to work around the innevitable 
-// boilerplate is not worth the trouble at this point.
-// We will need to get used to macro's and use them to derive all this stuff.
-impl<'de> Deserialize<'de> for String6 {
-    fn deserialize<D>(deserializer: D) -> Result<String6, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_string(String6Visitor)
     }
 }

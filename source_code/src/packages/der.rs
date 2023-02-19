@@ -1,7 +1,7 @@
 /**
  * Contains data types and functions for the DER function set
  */
-#[repr(UInt8)]
+#[repr(u8)]
 enum DERCurveType {
     OpModFreqWatt = 0,
     OpModHFRTMayTrip = 1,

@@ -1,3 +1,8 @@
+use macros::Link;
+use macros::Resource;
+use serde::Deserialize;
+use serde::Serialize;
+
 /*
  * Defines traits and structs described generally in section 8.2 
  * and in detail in section B.2.3.2. Specifically, it describes the
@@ -13,47 +18,48 @@
 /// there is no mention of how it should be implemented, so for the moment
 /// it will be an owned String type.
 
+use super::types::*;
+use super::primitives::*;
+
 // Traits
-trait Resource {
-    pub fn get_href(&self) -> Option<String>{
-        None;
+pub trait Resource {
+    fn get_href(&self) -> Option<String>{
+        None
     }
 }
 
-trait List {
+pub trait List {
     type Inner; // every struct can only implement this trait for 1 type.
-    pub fn get_values(s: UInt16, a: Option<TimeType>, l: UInt32) -> Vec<&Inner>; // need query parameters.
+    fn get_values(s: UInt16, a: Option<TimeType>, l: UInt32) -> Vec<Self::Inner>; // need query parameters.
 }
 
-trait LinkTrait {
-    pub fn get_href(&self) -> String{
-        None;
-    }
+pub trait Link {
+    fn get_href(&self) -> String;
 }
 
-trait Respondable {
-    pub fn get_replyTo(&self) -> Option<String>;
-    pub fn get_responseRequired(&self) -> Option<HexBinary8>;
+pub trait Respondable {
+    fn get_replyTo(&self) -> Option<String>;
+    fn get_responseRequired(&self) -> Option<HexBinary8>;
 }
 
-trait Subscribable {
-    todo!("define Subscribable trait functions");
+pub trait Subscribable {
+    // todo!("define Subscribable trait functions");
 }
 
-trait Identified {
-    todo!("define Identified trait functions");
+pub trait Identified {
+    // todo!("define Identified trait functions");
 }
 
 // Data Containers
 #[derive(Default, Debug, Serialize, Deserialize)]
-struct ResourceObj {
+pub struct ResourceObj {
     href: Option<String>,
 }
 
 impl ResourceObj {
     /// input's that do not start with '/' or are >255 characters
     /// are ignored and href value will be None.
-    fn new(href: Option<String>) -> ResourceObj{
+    pub fn new(href: Option<String>) -> ResourceObj{
         if let Some(ref href) = href{
             if !href.starts_with("/") || href.len() > 255{ 
                 return ResourceObj{href: None} 
@@ -73,7 +79,7 @@ impl Resource for ResourceObj {
 }
 
 /// List fields as per IEEE 2030.5 specification.
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize)]
 struct ListData<T: Resource>{
     all: u32,
     result: u32,
@@ -126,7 +132,7 @@ impl<T: Resource> ListData<T>{
     }
     /// removes an item from the ListData if it exists within the 
     fn remove_href(&mut self, href: &str) -> bool{
-        
+        true
     }
     /// returns `Some(ListData[index])` if it exists, else `None`
     /// Decrements `result`. DOES NOT decrement `all`.
@@ -160,8 +166,8 @@ impl<T: Resource> ListData<T>{
     }
 }
 
-#[derive(Resource, Default, Serialize, Deserialize)]
-struct ListObj<T: Resource> {
+#[derive(Default, Debug, Serialize, Deserialize)]
+struct ListObj<T: Resource>{
     super_class: ResourceObj,
     list_data: ListData<T>,
 }
@@ -175,75 +181,92 @@ impl<T: Resource> ListObj<T>{
     }
 }
 
+impl<T: Resource> Resource for ListObj<T>{
+    fn get_href(&self) -> Option<String> {
+        self.super_class.get_href()
+    }
+}
+
 // «XSDattribute»
-#[derive(Default, Serialize, Deserialize)]
-struct LinkObj {
+#[derive(Default, Debug, Serialize, Deserialize)]
+pub struct LinkObj {
     href: String,
 }
 
-#[derive(Default, Serialize, Deserialize)]
+impl Link for LinkObj{
+    fn get_href(&self) -> String{
+        return self.href.clone();
+    }
+}
+
+#[derive(Default, Debug, Serialize, Deserialize)]
 struct RespondableData{
     reply_to: Option<String>,
     response_required: HexBinary8,
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize)]
 struct SubscribableData{
     subscribable: Option<SubscribableType>,
 }
 
-#[derive(Default, Serialize, Deserialize)]
-struct IdentifiedData {
+#[derive(Default, Debug, Serialize)]
+pub struct IdentifiedData {
     description: String32,
     mrid_type: mRIDType,
     version: VersionType,
 }
 
-#[derive(Link)]
-struct ListLink {
+pub struct ListLink {
     super_class: LinkObj,
     all: Option<UInt32>,
 }
 
+impl Link for ListLink{
+    fn get_href(&self) -> String {
+        self.super_class.get_href()
+    }
+}
+
 #[derive(Resource, Default, Debug, Serialize, Deserialize)]
-struct RespondableResource {
+pub struct RespondableResource {
     super_class: ResourceObj,
     respondable_data: RespondableData,
 }
 
 #[derive(Resource, Default, Debug, Serialize, Deserialize)]
-struct SubscribableResource {
+pub struct SubscribableResource {
     super_class: ResourceObj,
     subscribable_data: SubscribableData,
 }
 
-#[derive(Resource, Default, Debug, Serialize, Deserialize)]
-struct IdentifiedObject {
+#[derive(Resource, Default, Debug, Serialize)]
+pub struct IdentifiedObject {
     super_class: ResourceObj,
     identified_data: IdentifiedData,
 }
 
-#[derive(Resource, Default, Debug, Serialize, Deserialize)]
-struct SubscribableIdentifiedObject {
+#[derive(Resource, Default, Debug, Serialize)]
+pub struct SubscribableIdentifiedObject {
     super_class: SubscribableResource,
     identified_data: IdentifiedData,
 }
 
 #[derive(Resource, Default, Debug, Serialize, Deserialize)]
-struct SubscribableList {
+pub struct SubscribableList {
     super_class: SubscribableResource,
-    list_data: ListData,
+    list_data: ListData<SubscribableResource>,
 }
 
-#[derive(Resource, Default, Debug, Serialize, Deserialize)]
-struct RespondableSubscribableIdentifiedObject {
+#[derive(Resource, Default, Debug, Serialize)]
+pub struct RespondableSubscribableIdentifiedObject {
     super_class: RespondableResource,
     subscribable_data: SubscribableData,
     identified_data: IdentifiedData,
 }
 
-#[derive(Resource, Default, Debug, Serialize, Deserialize)]
-struct RespondableIdentifiedObject {
+#[derive(Resource, Default, Debug, Serialize)]
+pub struct RespondableIdentifiedObject {
     super_class: RespondableResource,
     identified_data: IdentifiedData,    
 }

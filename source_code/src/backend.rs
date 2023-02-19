@@ -16,9 +16,31 @@
  * encoded.
  */
 
-pub fn service_response(path: &str, method: &str, body: Option<&str>) -> Vec<u8>{
+use crate::packages::edev;
+use crate::packages::dcap;
 
-    return vec![0];
+ pub fn service_response(path: &str, method: &str, body: Option<&str>) -> (u32, Vec<u8>){
+    // as function set files will have to check what is the mode of the request
+    // using wadl.rs, we are not checking it yet.
+    
+    // match path against all possible function sets,
+    // define the information we send that fs, and the information we expect back.
+    // namely, we need a status code and the message body. 
+
+    // return bad request otherwise.
+    println!("backend: path = {path}");
+    let mut path_iter = path.split('/');
+    path_iter.next();
+    let first_arg = path_iter.next().unwrap();
+    return match first_arg {
+        "dcap" => {
+            dcap::handle_request(path, method, body)
+        },
+        "edev" => {
+            edev::handle_request(path, method, body)
+        },
+        _ => (400, vec![0]),
+    };
 }
 // todo!("fs client response xml validation and utf8 encoding checking");
 

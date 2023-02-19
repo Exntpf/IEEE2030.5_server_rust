@@ -1,4 +1,4 @@
 pub mod identification;
 pub mod objects;
-pub mod primites;
+pub mod primitives;
 pub mod types;

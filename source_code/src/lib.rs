@@ -6,3 +6,4 @@ pub mod wadl;
 pub mod server;
 pub mod client;
 pub mod backend;
+pub mod packages;

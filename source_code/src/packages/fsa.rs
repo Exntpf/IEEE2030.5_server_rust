@@ -2,18 +2,22 @@
  * Function Set Assignmnets function set (B.2.5)
  */
 
-use common::*;
+
+use super::common::{
+    identification::*,
+    primitives::*,
+    types::*,
+    objects::*,
+};
 
 struct FunctionSetAssignmentsBase {
-    resource_data: ResourceData,
+    super_class: ResourceObj,
 }
 
 impl FunctionSetAssignmentsBase {
     fn new() -> FunctionSetAssignmentsBase{
         FunctionSetAssignmentsBase { 
-            reource_data: ResourceData{ 
-                href: AnyURI::new("/fsa") 
-            }
+            super_class: ResourceObj::new(Some(String::from("/fsa"))),
         }
     }
 }
@@ -22,7 +26,7 @@ impl FunctionSetAssignmentsBase {
 // resource_data field in the struct, or there's a field that 
 // implements the Resource Trait, we can write #derive for this trait
 impl Resource for FunctionSetAssignmentsBase {
-    fn get_href(&self) -> AnyURI {
-        self.resource_data.href
+    fn get_href(&self) -> Option<String> {
+        self.super_class.get_href()
     }
 }
