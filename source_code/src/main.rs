@@ -26,8 +26,7 @@ use std::{
 extern crate mbedtls;
 extern crate libc;
 
-use tls_server_client::{tcp::*, tls::*};
-use tls_server_client::errs::*;
+use source_code::{tls::establish_tls_server, errs::print_err, tcp::{listen, connect}};
 
 use mbedtls::{rng::{CtrDrbg, OsEntropy}};
 use mbedtls::pk::Pk;
@@ -43,7 +42,7 @@ fn run_client() -> i32{
 
 fn connect_to_server() -> i32{ // to make this return Result in the future so we can recover from this error
 
-
+    println!("Client: Establishing TCP connection with server IP: 127.0.0.1:7877");
     // not doing any error checking here, unlike earlier implementation.
     let stream = connect("127.0.0.1:7877").unwrap();
     // if let Err(e) = stream {
@@ -51,7 +50,7 @@ fn connect_to_server() -> i32{ // to make this return Result in the future so we
     // }
 
     // let stream = TcpStream::connect("127.0.0.1:7877").unwrap();
-
+    println!("Client: TCP connection established");
     let entropy = OsEntropy::new();
     let rng = Arc::new(CtrDrbg::new(Arc::new(entropy), None).unwrap());
 
@@ -71,51 +70,55 @@ fn connect_to_server() -> i32{ // to make this return Result in the future so we
     // CipherSuite::EcdheEcdsaWithAes256CbcSha384.into(), CipherSuite::EcdheEcdsaWithAes128CbcSha256.into(), 0];
     // config.set_ciphersuites(Arc::new(ciphersuite_list));
 
-    
-    println!("Client: Setting CA");
-    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/serca_cert.pem")
-    .expect("Could not read server certificate .pem file\n");
-    cert_content.append(&mut vec![0u8]); // becuase certificates must be \0 terminated
-    let cert_content_bytes: &[u8] = &cert_content;
-    let ca_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
-    config.set_ca_list(ca_cert, None);
-    
-    // read .pem files
-    println!("Client: loading certificate and private key");
-    let mut cert_content = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/client_cert.pem")
-    .expect("Could not read server certificate .pem file\n");
-    cert_content.append(&mut vec![0u8]); // becuase certificates must be \0 terminated
-    let cert_content_bytes: &[u8] = &cert_content;
-    
-    let mut private_key_contents = fs::read("/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/client_private_key.pem")
-    .expect("Could not read private key .pem file\n");
-    private_key_contents.append(&mut vec![0u8]);
-    let private_key_bytes: &[u8] = &private_key_contents;
-    // client is reading in the certificates.
-    
-    let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes).unwrap());
-    let key = Arc::new(Pk::from_private_key(private_key_bytes, None).unwrap());
-    if let Err(a) = config.push_cert(server_cert, key){
-        println!("client: ERR: {a}\nCould not load certificate to mbedtls config");
-        return -1;
-    }
-    
     /* 
      as 2030.5 client cannot connect to a server with a self-signed
      certificate, the client must set who the CA is. this can be done with:
      rust-mbedtls/mbedtls/tests/client_server.rs:79
-     Code to be inserted here.
      */
-    println!("Client: making new context");
+    
+    println!("Client: Setting CA");
+    let mut cert_content = fs::read("../../IEEE2030.5_server_rust/certs/serca_cert.pem")
+        .expect("Client: ERR: Could not read SERCA certificate file\n");
+    cert_content.append(&mut vec![0u8]); // becuase certificates must be \0 terminated
+    let cert_content_bytes: &[u8] = &cert_content;
+    let ca_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes)
+        .expect("Client: ERR: SERCA cert file corrupted"));
+    config.set_ca_list(ca_cert, None);
+    
+    // read .pem files
+    println!("Client: loading client certificate and private key");
+    let mut cert_content = fs::read("../../IEEE2030.5_server_rust/certs/client_cert.pem")
+        .expect("Client: ERR: Could not read client certificate .pem file\n");
+    cert_content.append(&mut vec![0u8]); // becuase certificates must be \0 terminated
+    let cert_content_bytes: &[u8] = &cert_content;
+    
+    let mut private_key_contents = fs::read("../../IEEE2030.5_server_rust/certs/client_private_key.pem")
+        .expect("Client: ERR: Could not read client private key .pem file\n");
+    private_key_contents.append(&mut vec![0u8]);
+    let private_key_bytes: &[u8] = &private_key_contents;
+
+    // client is reading in the certificates.
+    
+    let server_cert = Arc::new(Certificate::from_pem_multiple(cert_content_bytes)
+        .expect("Client: ERR: Client certificate file corrupted"));
+    let key = Arc::new(Pk::from_private_key(private_key_bytes, None)
+        .expect("Client: ERR: Client private key file corrupted"));
+    if let Err(a) = config.push_cert(server_cert, key){
+        print_err(true, a, "Could not load certificate to mbedtls config");
+        return -1;
+    }
+    
+   
+    println!("Client: making new ctx context");
     let mut ctx = Context::new(Arc::new(config));
     // so far so good - above code aligns with client_server.rs test on mbedtls GitHub repo.
     println!("Client: ctx setup complete. Attempting to establish connection TLS with server");
     match ctx.establish(stream, None) {
         Ok(()) => {
-            println!("Conneciton Established!");
+            println!("Client: Conneciton Established!");
         },
         Err(a) => {
-            print_err(true, a, "error establishing connection");
+            print_err(true, a, "Error establishing connection");
             return -1;
         },
     };
@@ -123,14 +126,14 @@ fn connect_to_server() -> i32{ // to make this return Result in the future so we
     let get_msg_str= "GET /dcap HTTP/1.1\r\n";
     match ctx.write_all(get_msg_str.as_bytes()){
         Ok(_) => println!("Client: GET message sent successfully."),
-        Err(a) => println!("Client: ERR: {a}\ncould not send GET request to server"),
+        Err(a) => print_err(true, a, "Could not send GET request to server"),
     }
 
     let mut buf = vec![0u8;200];
     let mut client_buf_reader = BufReader::new(ctx);
     let bytes_read = match client_buf_reader.read_until(0u8, &mut buf){
         Ok(a) => a,
-        Err(a) =>{ println!("client: Err: {a}\ncould not read server data into buffer"); 0} ,
+        Err(a) =>{ print_err(true, a, "Could not read server data into buffer"); 0} ,
     };
 
     
@@ -140,7 +143,7 @@ fn connect_to_server() -> i32{ // to make this return Result in the future so we
     // }
     // assert_eq!(&buf, format!("Cipher suite: c0ae").as_bytes());
 
-    println!("Client: Bytes receivec: {bytes_read}\nReceived server response:\n{}", String::from_utf8(buf).unwrap());
+    println!("Client: Bytes received: {bytes_read}\nReceived server response:\n{}", String::from_utf8(buf).unwrap());
     return 0;
 }
 
@@ -176,8 +179,8 @@ fn run_server() -> i32{
 // fn server_handle_connection(mut stream: TcpStream, key: Pk, cert: List<Certificate>){
 fn server_handle_connection(stream: TcpStream){
 
-    let cert_path = "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/server1_cert.pem";
-    let private_key_path = "/home/neel/Desktop/unswCasualProfessional_Files/server_casProf/tls_server_client/certs/server1_private_key.pem";
+    let cert_path = "../../IEEE2030.5_server_rust/certs/server_cert.pem";
+    let private_key_path = "../../IEEE2030.5_server_rust/certs/server_private_key.pem";
 
     let mut ctx = establish_tls_server(stream, private_key_path, cert_path);
 
@@ -185,7 +188,7 @@ fn server_handle_connection(stream: TcpStream){
     let bytes_read = match ctx.read(&mut server_buf){
         Ok(a) => a,
         Err(a) => {
-            println!("server: ERR: {a}\ncould not read client request");
+            print_err(false, a, "Could not read client request");
             0
         },
     };
@@ -201,9 +204,9 @@ fn server_handle_connection(stream: TcpStream){
                                     .unwrap();
     let (status_line, http_file) = match http_request_line {
         "GET /dcap HTTP/1.1" => {
-            ("HTTP/1.1 200 OK", "hello.html")
+            ("HTTP/1.1 200 OK", "../hello.html")
         },
-        _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
+        _ => ("HTTP/1.1 404 NOT FOUND", "../404.html"),
     };
     println!("returned status line -> {}", status_line);
     
@@ -219,7 +222,7 @@ fn server_handle_connection(stream: TcpStream){
     
     match ctx.write_all(response.as_bytes()){
         Ok(_) => println!("server: response sent to client."),
-        Err(a) => println!("server: ERR: {a}\nresponse not sent to client"),
+        Err(a) => print_err(false, a, "Response not sent to client"),
     }
     println!("full server response: {}",  response);
     
@@ -229,8 +232,7 @@ fn server_handle_connection(stream: TcpStream){
 
 fn main(){
     let args: Vec<String> = env::args().collect();
-    dbg!(args.len());
-    if !args.len() == 2 {
+    if !(args.len() == 2) {
         println!("Invalid arguments provided. Usage: -- \"client\"||\"server\"");
         return;
     };

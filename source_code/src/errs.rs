@@ -6,7 +6,7 @@ pub fn print_err<E: Error>(client: bool, err: E, msg: &str){
     } else {
         "server"
     };
-    let error_msg = format!("{entity}: ERR: {err}\n{msg}");
+    let error_msg = format!("{entity}: ERR: {err} {msg}");
     println!("{error_msg}");
 }
 

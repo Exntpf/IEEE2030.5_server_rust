@@ -9,7 +9,7 @@
 use std::str;
 use crate::xml::*;
 
-const WADL_PATH: &str = "IEEE2030.5_server_rust/sep_wadl.xml";
+const WADL_PATH: &str = "IEEE2030.5_server_rust/source_code/sep_wadl.xml";
 const VALID_METHODS: [&str; 5]= ["GET", "HEAD", "PUT", "POST", "DELETE"];
 
 pub enum Mode{

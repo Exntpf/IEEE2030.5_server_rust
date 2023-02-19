@@ -20,7 +20,7 @@ function goes here.
 }
 
 edev_handle( arguments ) -> Vec<u8>{
-    // backend guarantees that method here is valid. Not that that is 
+    // backend.rs guarantees that method here is valid. Not that that is 
     // actually required, since it is this file's job to ensure that every
     // path-method combo is accounted for in keeping with what has been implemented.
     // I guess it ensures that only wadl approved requests make it this far,
